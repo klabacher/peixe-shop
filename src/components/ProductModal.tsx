@@ -60,7 +60,7 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
             {product.name}
           </Typography>
           
-          <Typography level="body-md" textColor="text.secondary" sx={{ mb: 3 }}>
+          <Typography level="body-md" textColor="neutral.500" sx={{ mb: 3 }}>
             {product.description}
           </Typography>
 
@@ -93,7 +93,8 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
             fullWidth 
             size="lg"
             onClick={handleAddToCart}
-            sx={{ bgcolor: 'primary.solidBg', '&:hover': { bgcolor: 'primary.solidHoverBg' } }}
+            variant="solid"
+            color="success"
           >
             Adicionar • R$ {(product.price * quantity).toFixed(2).replace('.', ',')}
           </Button>

@@ -35,18 +35,26 @@ export default function CartPage() {
     return (
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <Typography level="h3" sx={{ mb: 2 }}>Seu carrinho está vazio</Typography>
-        <Button onClick={() => navigate('/')}>Voltar para a loja</Button>
+        <Button variant="solid" color="primary" onClick={() => navigate('/')}>Voltar para a loja</Button>
       </Box>
     );
   }
 
   return (
     <Box sx={{ pb: 12, bgcolor: 'background.body', minHeight: '100vh' }}>
-      <Sheet sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, position: 'sticky', top: 0, zIndex: 100, boxShadow: 'sm' }}>
-        <IconButton onClick={() => navigate('/')} variant="plain">
+      <Sheet
+        variant="solid"
+        color="primary"
+        sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, position: 'sticky', top: 0, zIndex: 100, boxShadow: 'sm' }}
+      >
+        <IconButton
+          onClick={() => navigate('/')}
+          variant="plain"
+          sx={{ color: 'primary.solidColor', '&:hover': { bgcolor: 'rgba(255,255,255,0.14)' } }}
+        >
           <ArrowBackIcon />
         </IconButton>
-        <Typography level="h4">Sacola</Typography>
+        <Typography level="h4" textColor="primary.solidColor">Sacola</Typography>
       </Sheet>
 
       <Box sx={{ p: 2 }}>
@@ -68,7 +76,7 @@ export default function CartPage() {
                     <DeleteOutlineIcon />
                   </IconButton>
                 </Box>
-                <Typography level="body-sm" sx={{ mb: 1 }}>
+                <Typography level="body-sm" textColor="success.plainColor" sx={{ mb: 1 }}>
                   R$ {item.price.toFixed(2).replace('.', ',')} / un
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -89,7 +97,7 @@ export default function CartPage() {
                       <AddIcon fontSize="small" />
                     </IconButton>
                   </Box>
-                  <Typography level="title-md">
+                  <Typography level="title-md" textColor="success.plainColor">
                     R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
                   </Typography>
                 </Box>
@@ -112,7 +120,7 @@ export default function CartPage() {
         <Sheet variant="soft" color="neutral" sx={{ p: 2, borderRadius: 'md' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography>Subtotal</Typography>
-            <Typography>R$ {total.toFixed(2).replace('.', ',')}</Typography>
+            <Typography textColor="success.plainColor">R$ {total.toFixed(2).replace('.', ',')}</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography>Taxa de serviço</Typography>
@@ -121,28 +129,28 @@ export default function CartPage() {
           <Divider sx={{ my: 1 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography level="title-lg">Total</Typography>
-            <Typography level="title-lg">R$ {total.toFixed(2).replace('.', ',')}</Typography>
+            <Typography level="title-lg" textColor="success.plainColor">R$ {total.toFixed(2).replace('.', ',')}</Typography>
           </Box>
         </Sheet>
       </Box>
 
-      <Sheet 
-        sx={{ 
-          position: 'fixed', 
-          bottom: 0, 
-          left: 0, 
-          right: 0, 
-          p: 2, 
-          borderTop: '1px solid', 
-          borderColor: 'divider',
-          bgcolor: 'background.surface'
+      <Sheet
+        variant="solid"
+        color="primary"
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          p: 2,
         }}
       >
         <Button 
           fullWidth 
           size="lg" 
           onClick={handleCheckout}
-          sx={{ bgcolor: 'primary.solidBg', '&:hover': { bgcolor: 'primary.solidHoverBg' } }}
+          variant="solid"
+          color="success"
         >
           Confirmar Pedido
         </Button>

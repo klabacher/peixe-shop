@@ -14,6 +14,8 @@ export default function Header({ cartCount }: HeaderProps) {
 
   return (
     <Sheet
+      variant="solid"
+      color="primary"
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -23,7 +25,6 @@ export default function Header({ cartCount }: HeaderProps) {
         top: 0,
         zIndex: 1000,
         boxShadow: 'sm',
-        bgcolor: 'background.surface',
       }}
     >
       <div>
@@ -32,9 +33,9 @@ export default function Header({ cartCount }: HeaderProps) {
         component="h1"
         sx={{ 
           fontWeight: 'xl', 
-          color: 'primary.900',
           cursor: 'pointer',
-          fontFamily: 'Anton, Inter, var(--joy-fontFamily-fallback)',
+          color: 'primary.solidColor',
+          '&:hover': { color: 'success.plainColor' },
         }}
         onClick={() => navigate('/')}
       >
@@ -45,9 +46,9 @@ export default function Header({ cartCount }: HeaderProps) {
         component="h1"
         sx={{
           fontWeight: 'xl', 
-          color: 'primary.900',
           cursor: 'pointer',
-          fontFamily: 'Anton, Inter, var(--joy-fontFamily-fallback)',
+          color: 'primary.solidColor',
+          '&:hover': { color: 'success.plainColor' },
         }}
         onClick={() => navigate('/')}
       >
@@ -55,12 +56,15 @@ export default function Header({ cartCount }: HeaderProps) {
       </Typography>
       </div>
 
-      <IconButton 
-        variant="plain" 
-        color="neutral"
+      <IconButton
+        variant="plain"
         onClick={() => navigate('/cart')}
+        sx={{
+          color: 'primary.solidColor',
+          '&:hover': { bgcolor: 'rgba(255,255,255,0.14)' },
+        }}
       >
-        <Badge badgeContent={cartCount} color="primary" size="sm">
+        <Badge badgeContent={cartCount} color="success" size="sm">
           <ShoppingBagIcon />
         </Badge>
       </IconButton>
