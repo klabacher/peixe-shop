@@ -1,13 +1,137 @@
+// import { extendTheme } from '@mui/joy/styles';
+
+// // Configuração das Fontes
+// const fontFamilyDisplay = "'Montserrat', sans-serif";
+// const fontFamilyBody = "'Inter', sans-serif";
+
+// // Novos Tokens de Design baseados no Relatório
+// export const brand = {
+//   navy: '#003366',       // Azul Marinho Profundo (Marca)
+//   coral: '#FF6B6B',      // Coral Vivo (Ação/Conversion)
+//   white: '#FFFFFF',
+//   offWhite: '#F7F8FA',   // Fundo App (Depth)
+//   grayDark: '#2D3436',   // Títulos
+//   grayMedium: '#636E72', // Descrições
+//   greenSuccess: '#00C853' // Feedback positivo
+// } as const;
+
+// export const joyTheme = extendTheme({
+//   fontFamily: {
+//     body: fontFamilyBody,
+//     display: fontFamilyDisplay,
+//   },
+//   radius: {
+//     xs: '8px',
+//     sm: '12px',
+//     md: '16px', // Padrão novo para Cards
+//     lg: '24px',
+//     xl: '32px',
+//   },
+//   shadow: {
+//     // Sistema de sombras coloridas (tinturadas de azul) para efeito "flutuante"
+//     xs: '0 2px 4px rgba(0, 51, 102, 0.05)',
+//     sm: '0 4px 8px rgba(0, 51, 102, 0.08)',
+//     md: '0 8px 16px rgba(0, 51, 102, 0.12)', // Sombra padrão do card
+//     lg: '0 12px 24px rgba(0, 51, 102, 0.15)',
+//     xl: '0 20px 40px rgba(0, 51, 102, 0.20)',
+//   },
+//   colorSchemes: {
+//     light: {
+//       palette: {
+//         primary: {
+//           // Usamos o Azul Navy como cor primária institucional
+//           500: brand.navy,
+//           plainColor: brand.navy,
+//           solidBg: brand.navy,
+//           solidHoverBg: 'rgba(0, 51, 102, 0.9)',
+//           solidColor: brand.white,
+//         },
+//         // O "Danger" ou uma cor customizada pode atuar como o Coral de ação principal
+//         danger: {
+//           500: brand.coral,
+//           plainColor: brand.coral,
+//           solidBg: brand.coral,
+//           solidHoverBg: '#FF5252',
+//           solidColor: brand.white,
+//         },
+//         success: {
+//           500: brand.greenSuccess,
+//           solidBg: brand.greenSuccess,
+//         },
+//         neutral: {
+//           // Ajuste de tons de cinza para melhor leitura
+//           500: brand.grayMedium,
+//           700: brand.grayDark,
+//           800: '#1F2937',
+//         },
+//         background: {
+//           body: brand.offWhite, // Fundo geral off-white
+//           surface: brand.white, // Cards brancos puros
+//         },
+//         text: {
+//           primary: brand.grayDark,
+//           secondary: brand.grayMedium,
+//         },
+//       },
+//     },
+//   },
+//   components: {
+//     JoyButton: {
+//       styleOverrides: {
+//         root: {
+//           borderRadius: '12px', // Botões mais arredondados
+//           fontFamily: fontFamilyDisplay,
+//           fontWeight: 700,
+//           transition: 'all 0.2s ease',
+//           '&:active': {
+//             transform: 'scale(0.96)', // Feedback tátil visual
+//           },
+//         },
+//       },
+//     },
+//     JoyCard: {
+//       styleOverrides: {
+//         root: {
+//           border: 'none', // Removemos a borda cinza padrão
+//           backgroundColor: brand.white,
+//           borderRadius: '16px',
+//           boxShadow: '0 8px 16px rgba(0, 51, 102, 0.08)', // Sombra atmosférica
+//           transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+//           '&:hover': {
+//             transform: 'translateY(-4px)', // Efeito de elevação
+//             boxShadow: '0 12px 24px rgba(0, 51, 102, 0.12)',
+//           },
+//         },
+//       },
+//     },
+//     JoyTypography: {
+//       styleOverrides: {
+//         root: ({ ownerState }) => ({
+//           ...(ownerState.level?.includes('h') && {
+//             fontFamily: fontFamilyDisplay,
+//             letterSpacing: '-0.02em', // Tight tracking para títulos modernos
+//           }),
+//         }),
+//       },
+//     },
+//   },
+// });
+
+// export default joyTheme;
+
 import { extendTheme } from '@mui/joy/styles';
-import { fontFamilyBody, fontFamilyDisplay } from './fonts';
+
+const fontFamilyDisplay = "'Montserrat', sans-serif";
+const fontFamilyBody = "'Inter', sans-serif";
 
 export const brand = {
-  blue: '#004B87',
-  green: '#00A651',
+  navy: '#003366',       
+  coral: '#FF6B6B',      
   white: '#FFFFFF',
-  gray: '#6B7280',
-  yellow: '#F4A020',
-  red: '#E63946',
+  offWhite: '#F7F8FA', 
+  grayDark: '#2D3436',   
+  grayMedium: '#636E72',
+  greenSuccess: '#00C853'
 } as const;
 
 export const joyTheme = extendTheme({
@@ -16,130 +140,39 @@ export const joyTheme = extendTheme({
     display: fontFamilyDisplay,
   },
   radius: {
-    xs: '10px',
-    sm: '10px',
-    md: '10px',
-    lg: '10px',
-    xl: '10px',
+    xs: '8px',
+    sm: '12px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    pill: '999px', // Adicionado para as abas redondas
   },
   shadow: {
-    xs: '0 1px 6px rgba(0,0,0,0.05)',
-    sm: '0 2px 10px rgba(0,0,0,0.06)',
-    md: '0 6px 18px rgba(0,0,0,0.10)',
-    lg: '0 10px 30px rgba(0,0,0,0.12)',
-    xl: '0 16px 40px rgba(0,0,0,0.14)',
+    xs: '0 2px 4px rgba(0, 51, 102, 0.05)',
+    sm: '0 4px 8px rgba(0, 51, 102, 0.08)',
+    md: '0 8px 16px rgba(0, 51, 102, 0.12)',
   },
   colorSchemes: {
     light: {
       palette: {
         primary: {
-          500: brand.blue,
-          plainColor: brand.blue,
-          solidBg: brand.blue,
-          solidHoverBg: 'rgba(0, 75, 135, 0.92)',
-          solidColor: brand.white,
-          outlinedBorder: 'rgba(0, 75, 135, 0.22)',
-          outlinedHoverBorder: 'rgba(0, 75, 135, 0.32)',
-        },
-        success: {
-          500: brand.green,
-          plainColor: brand.green,
-          solidBg: brand.green,
-          solidHoverBg: 'rgba(0, 166, 81, 0.92)',
-          solidColor: brand.white,
-        },
-        warning: {
-          500: brand.yellow,
-          plainColor: brand.yellow,
-          solidBg: brand.yellow,
-          solidHoverBg: 'rgba(244, 160, 32, 0.92)',
+          500: brand.navy,
+          solidBg: brand.navy,
+          solidHoverBg: 'rgba(0, 51, 102, 0.9)',
           solidColor: brand.white,
         },
         danger: {
-          500: brand.red,
-          plainColor: brand.red,
-          solidBg: brand.red,
-          solidHoverBg: 'rgba(230, 57, 70, 0.92)',
+          500: brand.coral,
+          solidBg: brand.coral,
+          solidHoverBg: '#FF5252',
           solidColor: brand.white,
         },
         neutral: {
-          50: '#F9FAFB',
-          100: '#F3F4F6',
-          200: '#E5E7EB',
-          300: '#D1D5DB',
-          400: '#9CA3AF',
-          500: brand.gray,
-          600: '#4B5563',
-          700: '#374151',
-          800: '#1F2937',
-          900: '#111827',
+          100: '#F0F2F5', // Fundo hover das abas
         },
         background: {
-          body: brand.white,
+          body: brand.offWhite,
           surface: brand.white,
-        },
-        text: {
-          secondary: brand.gray,
-        },
-        divider: 'rgba(0, 75, 135, 0.12)',
-      },
-    },
-  },
-  components: {
-    JoyButton: {
-      defaultProps: {
-        variant: 'solid',
-      },
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          borderRadius: '10px',
-          fontFamily: fontFamilyDisplay,
-          fontWeight: 700,
-        },
-      },
-    },
-    JoyCard: {
-      defaultProps: {
-        variant: 'outlined',
-      },
-      styleOverrides: {
-        root: {
-          backgroundColor: brand.white,
-          borderColor: 'rgba(0, 75, 135, 0.12)',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-          transition: 'box-shadow 150ms ease, border-color 150ms ease',
-          '&:hover': {
-            boxShadow: '0 6px 18px rgba(0,0,0,0.10)',
-            borderColor: 'rgba(0, 75, 135, 0.22)',
-          },
-        },
-      },
-    },
-    JoyInput: {
-      styleOverrides: {
-        root: {
-          '--Input-radius': '10px',
-          '--Input-focusedHighlight': brand.blue,
-          '--Input-placeholderColor': brand.gray,
-        },
-        input: {
-          '&::placeholder': {
-            color: brand.gray,
-            opacity: 1,
-          },
-        },
-      },
-    },
-    JoyLink: {
-      defaultProps: {
-        color: 'primary',
-      },
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            color: 'success.plainColor',
-          },
         },
       },
     },
