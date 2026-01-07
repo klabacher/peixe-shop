@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // Admin check - add your admin emails here
+    function isAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email != null &&
+             (request.auth.token.email == 'admin@peixeshop.com' ||
+              request.auth.token.email == 'admin@example.com');
+    }
+    
+    // Products collection
+    match /products/{productId} {
+      allow read: if true; // Public read access
+      allow create, update, delete: if isAdmin(); // Admin only writes
+    }
+    
+    // Orders collection - Users can only create and read their own orders
+    match /orders/{orderId} {
+      allow create: if isSignedIn() || request.auth == null; // Allow anonymous orders
+      allow read: if isSignedIn() && 
+                     (resource.data.userId == request.auth.uid || 
+                      !('userId' in resource.data)); // Can read own orders or anonymous
+      allow update, delete: if false; // No updates/deletes from client
+    }
+    
+    // User profiles (optional) - Users can only read/write their own profile
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    // Analytics/Logs (optional) - Write only, no reads (cost saving)
+    match /analytics/{docId} {
+      allow read: if false;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+  }
+}

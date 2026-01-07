@@ -145,7 +145,6 @@ export const joyTheme = extendTheme({
     md: '16px',
     lg: '24px',
     xl: '32px',
-    pill: '999px', // Adicionado para as abas redondas
   },
   shadow: {
     xs: '0 2px 4px rgba(0, 51, 102, 0.05)',
