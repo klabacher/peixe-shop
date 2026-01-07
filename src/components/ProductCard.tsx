@@ -7,7 +7,7 @@ import Button from '@mui/joy/Button';
 import Box from '@mui/joy/Box';
 import Chip from '@mui/joy/Chip'; // Import do Chip
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBagOutlined';
-import type { Product } from '../data/mockData';
+import type { Product } from '../types/product';
 
 interface ProductCardProps {
   product: Product;

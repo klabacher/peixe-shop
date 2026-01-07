@@ -10,7 +10,7 @@ import IconButton from '@mui/joy/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import Sheet from '@mui/joy/Sheet';
-import type { Product } from '../data/mockData';
+import type { Product } from '../types/product';
 
 interface ProductModalProps {
   open: boolean;

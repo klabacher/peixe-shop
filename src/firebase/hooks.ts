@@ -6,6 +6,7 @@ import {
   getUserOrders,
   createOrder 
 } from './firestore';
+import type { Product } from '../types/product';
 
 // Hook for auth state with minimal re-renders
 export function useAuth() {
@@ -25,7 +26,7 @@ export function useAuth() {
 
 // Hook for products with caching
 export function useProducts() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -35,7 +36,7 @@ export function useProducts() {
     getProducts()
       .then((data) => {
         if (isMounted) {
-          setProducts(data);
+          setProducts(data as Product[]);
           setLoading(false);
         }
       })
@@ -56,7 +57,7 @@ export function useProducts() {
 
 // Hook for category products with caching
 export function useProductsByCategory(category: string) {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -67,7 +68,7 @@ export function useProductsByCategory(category: string) {
     getProductsByCategory(category)
       .then((data) => {
         if (isMounted) {
-          setProducts(data);
+          setProducts(data as Product[]);
           setLoading(false);
         }
       })
