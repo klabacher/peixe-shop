@@ -20,6 +20,7 @@ import { signOut, useProducts } from '../../firebase';
 import ProductForm from '../../components/admin/ProductForm';
 import ProductList from '../../components/admin/ProductList';
 import CategoryManager from '../../components/admin/CategoryManager';
+import SeedDatabaseButton from '../../components/admin/SeedDatabaseButton';
 import type { Product } from '../../types/product';
 
 export default function AdminDashboard() {
@@ -109,15 +110,18 @@ export default function AdminDashboard() {
             Live
           </Chip>
         </Box>
-        <Button
-          variant="outlined"
-          color="neutral"
-          startDecorator={<LogoutIcon />}
-          onClick={handleSignOut}
-          size="sm"
-        >
-          Sign Out
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <SeedDatabaseButton />
+          <Button
+            variant="outlined"
+            color="neutral"
+            startDecorator={<LogoutIcon />}
+            onClick={handleSignOut}
+            size="sm"
+          >
+            Sign Out
+          </Button>
+        </Box>
       </Sheet>
 
       <Box
