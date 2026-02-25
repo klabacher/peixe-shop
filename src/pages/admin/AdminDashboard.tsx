@@ -20,7 +20,6 @@ import { signOut, useProducts } from '../../firebase';
 import ProductForm from '../../components/admin/ProductForm';
 import ProductList from '../../components/admin/ProductList';
 import CategoryManager from '../../components/admin/CategoryManager';
-import SeedDatabaseButton from '../../components/admin/SeedDatabaseButton';
 import AdminSettings from './AdminSettings';
 import type { Product } from '../../types/product';
 
@@ -105,14 +104,13 @@ export default function AdminDashboard() {
           }}
         >
           <Typography level="h3" sx={{ fontSize: { xs: '1.6rem', sm: '2rem' } }}>
-            🐟 Admin Dashboard
+            🐟 Painel de Controle
           </Typography>
           <Chip color="success" size="sm">
-            Live
+            Online
           </Chip>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <SeedDatabaseButton />
           <Button
             variant="outlined"
             color="neutral"
@@ -120,7 +118,7 @@ export default function AdminDashboard() {
             onClick={handleSignOut}
             size="sm"
           >
-            Sign Out
+            Sair
           </Button>
         </Box>
       </Sheet>

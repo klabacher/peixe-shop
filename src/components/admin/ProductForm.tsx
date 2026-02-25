@@ -211,7 +211,7 @@ export default function ProductForm({ open, onClose, product, onSaved }: Product
                 />
                 {imagePreview ? (
                   <AspectRatio ratio="16/9" sx={{ borderRadius: 'md', overflow: 'hidden' }}>
-                    <img src={imagePreview} alt="Preview" style={{ objectFit: 'cover' }} />
+                    <img src={imagePreview} alt="Pré-visualização" style={{ objectFit: 'cover' }} />
                   </AspectRatio>
                 ) : (
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3, gap: 1 }}>

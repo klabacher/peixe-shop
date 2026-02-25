@@ -25,7 +25,7 @@ export function StoreSettingsProvider({ children }: { children: ReactNode }) {
         setSettings(data);
       })
       .catch((err) => {
-        console.error('Failed to load store settings:', err);
+        console.error('Falha ao carregar configurações da loja:', err);
       })
       .finally(() => {
         setLoading(false);

@@ -25,17 +25,17 @@ export default function ProductList({ products, loading, onEdit }: ProductListPr
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const handleDelete = async (productId: string, productName: string) => {
-    if (!confirm(`Delete "${productName}"? This cannot be undone.`)) {
+    if (!confirm(`Excluir "${productName}"? Esta ação não pode ser desfeita.`)) {
       return;
     }
 
     setDeleting(productId);
     try {
       await deleteProduct(productId);
-      alert('Product deleted successfully!');
+      alert('Produto excluído com sucesso!');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Failed to delete: ${message}`);
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Falha ao excluir: ${message}`);
     } finally {
       setDeleting(null);
     }
@@ -54,7 +54,7 @@ export default function ProductList({ products, loading, onEdit }: ProductListPr
       <Card variant="soft">
         <CardContent>
           <Typography level="body-lg" sx={{ textAlign: 'center' }}>
-            No products yet. Click "Add Product" to create your first item.
+            Nenhum produto cadastrado. Clique em "Adicionar item" para criar o primeiro produto.
           </Typography>
         </CardContent>
       </Card>
@@ -67,7 +67,7 @@ export default function ProductList({ products, loading, onEdit }: ProductListPr
         const stockValue = typeof product.stock === 'number' ? product.stock : null;
         const stockColor = stockValue === null ? 'neutral' : stockValue > 10 ? 'success' : 'warning';
         const stockDecorator = stockValue !== null && stockValue < 10 ? <WarningIcon /> : null;
-        const stockLabel = stockValue === null ? 'Stock: —' : `Stock: ${stockValue}`;
+        const stockLabel = stockValue === null ? 'Estoque: —' : `Estoque: ${stockValue}`;
         const unitLabel = product.unit ?? 'un';
 
         return (
@@ -145,7 +145,7 @@ export default function ProductList({ products, loading, onEdit }: ProductListPr
                   </Chip>
                   {product.isBestSeller && (
                     <Chip size="sm" color="primary">
-                      ⭐ Best Seller
+                      ⭐ Mais Pedido
                     </Chip>
                   )}
                 </Box>

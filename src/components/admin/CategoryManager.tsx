@@ -33,25 +33,25 @@ export default function CategoryManager({ products }: CategoryManagerProps) {
 
   const handleAddCategory = () => {
     if (!newCategory.trim()) return;
-    alert(`Category "${newCategory}" will be available when you add a product with this category.`);
+    alert(`A categoria "${newCategory}" ficará disponível ao adicionar um produto com essa categoria.`);
     setNewCategory('');
   };
 
   return (
     <Box>
       <Typography level="h4" sx={{ mb: 3 }}>
-        Manage Categories
+        Gerenciar Categorias
       </Typography>
 
       {/* Add New Category */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography level="title-md" sx={{ mb: 2 }}>
-            Add New Category
+            Nova Categoria
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Input
-              placeholder="Enter category name..."
+              placeholder="Nome da categoria..."
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
               sx={{ flex: 1 }}
@@ -61,25 +61,25 @@ export default function CategoryManager({ products }: CategoryManagerProps) {
               startDecorator={<AddIcon />}
               onClick={handleAddCategory}
             >
-              Add
+              Adicionar
             </Button>
           </Box>
           <Typography level="body-sm" sx={{ mt: 1, color: 'text.tertiary' }}>
-            Categories are automatically created when you add products. This helps you pre-define them.
+            As categorias são criadas automaticamente ao adicionar produtos. Use isso para pré-definir nomes.
           </Typography>
         </CardContent>
       </Card>
 
       {/* Existing Categories */}
       <Typography level="title-lg" sx={{ mb: 2 }}>
-        Existing Categories
+        Categorias Existentes
       </Typography>
 
       {categories.length === 0 ? (
         <Card variant="soft">
           <CardContent>
             <Typography sx={{ textAlign: 'center' }}>
-              No categories yet. Add products to create categories.
+              Nenhuma categoria ainda. Adicione produtos para criar categorias.
             </Typography>
           </CardContent>
         </Card>
@@ -100,10 +100,10 @@ export default function CategoryManager({ products }: CategoryManagerProps) {
                     <Typography level="title-lg">{category}</Typography>
                     <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                       <Chip size="sm" color="primary">
-                        {stats.count} products
+                        {stats.count} produtos
                       </Chip>
                       <Chip size="sm" color="success">
-                        {stats.totalStock} total stock
+                        {stats.totalStock} em estoque
                       </Chip>
                     </Box>
                   </Box>
@@ -126,16 +126,16 @@ export default function CategoryManager({ products }: CategoryManagerProps) {
       <Card variant="soft" color="primary" sx={{ mt: 3 }}>
         <CardContent>
           <Typography level="title-sm" sx={{ mb: 1 }}>
-            💡 Category Management Tips
+            💡 Dicas de Gerenciamento
           </Typography>
           <Typography level="body-sm">
-            • Categories are created automatically from products
+            • Categorias são criadas automaticamente ao cadastrar produtos
             <br />
-            • Use consistent naming (e.g., "Peixes" not "peixe" or "Peixe")
+            • Use nomes consistentes (ex: "Peixes" e não "peixe" ou "PEIXE")
             <br />
-            • Edit product categories to reorganize items
+            • Edite a categoria dos produtos para reorganizar o cardápio
             <br />
-            • Delete all products in a category to remove it
+            • Para excluir uma categoria, mova ou exclua todos os produtos dela
           </Typography>
         </CardContent>
       </Card>
