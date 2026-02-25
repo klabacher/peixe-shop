@@ -5,8 +5,9 @@ import CardOverflow from '@mui/joy/CardOverflow';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/joy/Button';
 import Box from '@mui/joy/Box';
-import Chip from '@mui/joy/Chip'; // Import do Chip
+import Chip from '@mui/joy/Chip';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBagOutlined';
+import { DEFAULT_PRODUCT_IMAGE } from '../supabase';
 import type { Product } from '../types/product';
 
 interface ProductCardProps {
@@ -15,7 +16,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onClick }: ProductCardProps) {
-  // Cálculo da porcentagem de desconto
   const discount = product.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -30,7 +30,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         flexDirection: 'column',
         border: 'none',
         borderRadius: '16px',
-        boxShadow: 'md', // Usando sombra do tema novo
+        boxShadow: 'md',
         transition: 'transform 0.2s',
         '&:hover': { transform: 'translateY(-4px)' }
       }}
@@ -43,9 +43,9 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
             loading="lazy"
             alt={product.name}
             style={{ objectFit: 'cover' }}
+            onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
           />
         </AspectRatio>
-        {/* Badge de Desconto sobre a imagem */}
         {discount > 0 && (
           <Chip
             color="danger"
@@ -57,6 +57,8 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
               right: 10,
               fontWeight: 'bold',
               borderRadius: 'sm',
+              fontSize: '0.7rem',
+              px: 1,
             }}
           >
             -{discount}% OFF
@@ -64,36 +66,52 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
         )}
       </CardOverflow>
       
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Typography level="title-md" sx={{ fontWeight: 800, mt: 1 }}>
           {product.name}
         </Typography>
         
-        <Typography level="body-xs" sx={{ mb: 1, flex: 1, color: 'text.secondary', lineHeight: 1.4 }}>
+        <Typography level="body-xs" sx={{ mb: 0.5, flex: 1, color: 'text.secondary', lineHeight: 1.4 }}>
           {product.description.length > 60 
             ? product.description.substring(0, 60) + '...' 
             : product.description}
         </Typography>
 
         <Box sx={{ mt: 'auto' }}>
-          {/* Exibição de Preço: De / Por */}
-          {product.originalPrice && (
-            <Typography level="body-xs" sx={{ textDecoration: 'line-through', color: 'text.tertiary' }}>
-              R$ {product.originalPrice.toFixed(2).replace('.', ',')}
-            </Typography>
-          )}
+          {product.originalPrice && product.originalPrice > product.price ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography level="body-xs" sx={{ color: 'text.tertiary', fontSize: '0.7rem' }}>
+                De
+              </Typography>
+              <Typography level="body-sm" sx={{ textDecoration: 'line-through', color: 'neutral.400', fontSize: '0.8rem' }}>
+                R$ {product.originalPrice.toFixed(2).replace('.', ',')}
+              </Typography>
+            </Box>
+          ) : null}
           
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography level="h4" sx={{ color: product.originalPrice ? 'danger.500' : 'primary.500', fontWeight: 800 }}>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <Typography level="body-xs" sx={{ color: 'danger.500', fontWeight: 600, fontSize: '0.7rem' }}>
+                Por
+              </Typography>
+            )}
+            <Typography level="h4" sx={{ 
+              color: product.originalPrice && product.originalPrice > product.price ? 'danger.500' : 'primary.500', 
+              fontWeight: 800,
+              fontSize: product.originalPrice ? '1.3rem' : '1.1rem',
+            }}>
               R$ {product.price.toFixed(2).replace('.', ',')}
             </Typography>
+            {product.unit && (
+              <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>/{product.unit}</Typography>
+            )}
           </Box>
         </Box>
 
         <Button
           variant="solid"
-          color={product.originalPrice ? "danger" : "primary"} // Botão vermelho se for oferta
-          size="sm" // Botão mais compacto
+          color={product.originalPrice && product.originalPrice > product.price ? "danger" : "primary"}
+          size="sm"
           startDecorator={<ShoppingBagIcon />}
           onClick={(event) => {
             event.stopPropagation();
@@ -101,7 +119,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           }}
           sx={{ width: '100%', mt: 1, borderRadius: '12px' }}
         >
-          {product.originalPrice ? 'Aproveitar' : 'Pôr na Cesta'}
+          {product.originalPrice && product.originalPrice > product.price ? 'Aproveitar' : 'Pôr na Cesta'}
         </Button>
       </CardContent>
     </Card>

@@ -1,6 +1,9 @@
 import { Box, Typography } from "@mui/joy";
+import { useStoreSettings } from "../context/useStoreSettings";
 
 export default function LogoSection() {
+  const { settings } = useStoreSettings();
+
   return (
     <Box sx={{ p: 3, textAlign: "center", backgroundColor: "background.body" }}>
       <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
@@ -13,7 +16,7 @@ export default function LogoSection() {
             color: "primary.500",
           }}
         >
-          VIGANÔ
+          {settings.storeName}
         </Typography>
         <Typography
           level="h4"
@@ -24,7 +27,7 @@ export default function LogoSection() {
             color: "primary.500",
           }}
         >
-          PESCADOS
+          {settings.storeSubname}
         </Typography>
       </div>
       <Typography
@@ -36,16 +39,14 @@ export default function LogoSection() {
           color: "primary.500",
         }}
       >
-        O Frescor do Mar, na Sua Mesa.
+        {settings.storeTagline}
       </Typography>
 
       <Typography
         level="body-md"
         sx={{ maxWidth: "600px", mx: "auto", color: "text.secondary" }}
       >
-        Há anos selecionando os peixes mais nobres e os camarões mais frescos
-        para você. Nossa missão é levar saúde, sabor e a tradição da alta
-        gastronomia diretamente para a sua família em Colatina.
+        {settings.storeDescription}
       </Typography>
     </Box>
   );

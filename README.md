@@ -1,292 +1,116 @@
-# Peixe Shop - React + Vite + Firebase
+# Viganô Pescados - E-commerce
 
-A modern e-commerce shop with **zero-cost Firebase backend** implementation.
+<div align="center">
+  <img src="/favicon.png" alt="Viganô Pescados Logo" width="120" />
+  <h3>Peixaria & Frutos do Mar Frescos</h3>
+</div>
 
-## 🔐 Admin Dashboard
-
-Complete admin panel for managing products and categories:
-- **Access:** `/admin/login`
-- **Features:** Create, Edit, Delete products
-- **Security:** Email whitelist + protected routes
-- **Mobile:** Fully responsive
-
-[📖 Admin Guide](./ADMIN_GUIDE.md) - Complete admin documentation
-
-### Quick Admin Setup
-```bash
-# 1. Access admin login
-http://localhost:5173/admin/login
-
-# 2. Create admin account with your email
-
-# 3. Add your email to whitelist
-# Edit: src/components/ProtectedRoute.tsx
-const ADMIN_EMAILS = ['youremail@example.com'];
-
-# 4. Deploy security rules
-firebase deploy --only firestore:rules
-```
+Uma plataforma de e-commerce moderna desenvolvida para a Viganô Pescados, focada na venda de peixes e frutos do mar com integração direta via WhatsApp.
 
 ---
 
-## 🔥 Firebase Features (Zero Monthly Cost)
+## 🚀 Funcionalidades Principais
 
-This project includes a **fully optimized Firebase setup** designed to stay within the free tier:
+### 🛍️ Vitrine Digital
+  - **Catálogo Dinâmico**: Produtos organizados por categorias (Peixes, Camarões, Frutos do Mar, etc.)
+  - **Destaques**: Seção de "Mais Pedidos" e "Ofertas" com preços promocionais
+  - **Detalhes do Produto**: Modal com informações completas e imagens em alta resolução
+  - **Preços e Descontos**: Exibição clara de "De/Por" para promoções
+  - **Responsivo**: Interface mobile-first otimizada para qualquer dispositivo
 
-- ✅ **Authentication** (Anonymous + Email/Password)
-- ✅ **Firestore Database** (with aggressive caching)
-- ✅ **Security Rules** (production-ready)
-- ✅ **Hosting** (optional)
-- ✅ **Offline Support** (reduces reads by 90%)
+### 🛒 Carrinho & Checkout
+  - **Gestão de Pedidos**: Carrinho persistente (salvo localmente) com ajuste de quantidades
+  - **Busca de CEP**: Integração com ViaCEP para preenchimento automático de endereço
+  - **Checkout via WhatsApp**: Envia o pedido formatado diretamente para o WhatsApp da loja
+  - **Mensagem Personalizada**: Inclui nome do cliente, itens, total, observações e método (Retirada)
+  - **Cálculo de Total**: Somatório automático com suporte a promoções
 
-### Cost Optimization Features
-- 5-minute client-side cache
-- Offline persistence enabled
-- No real-time listeners
-- Batch operations
-- Query limits
-- Read-only products from client
+### 🔐 Painel Administrativo
+  - **Dashboard**: Visão geral produtos, categorias, estatísticas de estoque
+  - **Gestão de Produtos**:
+    - Cadastro e edição completa (Nome, Descrição, Preço, Unidade, Estoque)
+    - **Upload de Imagens**: Integração com Supabase Storage para gestão otimizada
+    - **Preços Promocionais**: Definição de preço original e preço com desconto
+  - **Configurações da Loja**:
+    - Alteração dinâmica de Nome, Slogan, Endereço e Horários
+    - Embed do Google Maps configurável
+    - Alteração de senha administrativa (Login único: `admin@vigano.com.br`)
+  - **Segurança**: Autenticação via Firebase Auth (sem registro público)
 
-**Expected Usage:** < 5% of free tier limits 🎉
+---
 
-## 🚀 Quick Start
+## 🛠️ Stack Tecnológico
 
-### 1. Install Dependencies
+- **Frontend**: React 19, TypeScript, Vite
+- **UI Framework**: MUI Joy UI (Design System moderno e acessível)
+- **Backend (Serverless)**:
+  - **Firebase Firestore**: Banco de dados NoSQL para produtos e configurações
+  - **Firebase Auth**: Autenticação segura para administradores
+  - **Supabase Storage**: Armazenamento otimizado de imagens dos produtos
+- **Integrações**:
+  - **ViaCEP**: Consulta de endereços automática
+  - **WhatsApp API**: Checkout direto via link
+  - **Google Maps**: Visualização da unidade física
+
+---
+
+## 📦 Instalação e Configuração
+
+### Pré-requisitos
+- Node.js 18+
+- Conta no Firebase e Supabase
+
+### 1. Clone o repositório
+```bash
+git clone https://github.com/seu-usuario/peixe-shop.git
+cd peixe-shop
+```
+
+### 2. Instale as dependências
 ```bash
 npm install
 ```
 
-### 2. Firebase Setup
-```bash
-# Copy environment template
-cp .env.example .env.local
+### 3. Configure as variáveis de ambiente
+Crie um arquivo `.env.local` na raiz do projeto com as chaves do Firebase e Supabase:
+(Veja `.env.example` se disponível)
 
-# Add your Firebase config to .env.local
-# Get config from: https://console.firebase.google.com
+```env
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=sua_api_key
+VITE_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=seu_projeto_id
+VITE_FIREBASE_STORAGE_BUCKET=seu_projeto.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
+VITE_FIREBASE_APP_ID=seu_app_id
+VITE_FIREBASE_MEASUREMENT_ID=seu_measurement_id
+
+# Supabase Configuration
+VITE_SUPABASE_URL=sua_supabase_url
+VITE_SUPABASE_ANON_KEY=sua_supabase_anon_key
 ```
 
-### 3. Configure Firebase Project
-See **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)** for detailed instructions:
-- Create Firebase project
-- Enable Firestore & Auth
-- Deploy security rules
-- Seed product data
+### 4. Admin Inicial
+A aplicação utiliza um único email de administração: `admin@vigano.com.br`.
+A senha inicial é definida durante o seed ou manualmente no Firestore.
+Para popular o banco com dados de exemplo e configurações da loja:
+- Acesse `/admin/dashboard` após login
+- Use o botão **"Popular Banco de Dados"** no topo da tela
 
-### 4. Run Development Server
+### 5. Execute o projeto
 ```bash
 npm run dev
+// Acesse http://localhost:5173
 ```
-
-## 📁 Project Structure
-
-```
-src/
-├── firebase/
-│   ├── config.ts          # Firebase initialization
-│   ├── auth.ts            # Authentication helpers
-│   ├── firestore.ts       # Database operations (with caching)
-│   ├── hooks.ts           # React hooks for Firebase
-│   └── index.ts           # Exports
-├── components/
-│   ├── AuthExample.tsx    # Auth demo
-│   ├── FirestoreProductsExample.tsx
-│   ├── OrderExample.tsx
-│   └── ...
-├── context/
-│   └── CartContext.tsx
-└── pages/
-    ├── HomePage.tsx
-    └── CartPage.tsx
-```
-
-## 🔒 Security
-
-Firestore security rules included:
-- Products: Read-only from client
-- Orders: Create-only (users can't modify after creation)
-- Users: Can only access own data
-
-## 📊 Firebase Usage Monitoring
-
-Monitor your usage at [Firebase Console](https://console.firebase.google.com):
-- Firestore reads/writes/deletes
-- Auth monthly active users
-- Hosting bandwidth
-
-**Target:** Stay under 10% of free tier limits
-
-## 🛠️ Available Scripts
-
-```bash
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Lint code
-
-# Firebase
-firebase deploy --only firestore:rules  # Deploy security rules
-firebase deploy --only hosting          # Deploy to Firebase Hosting
-```
-
-## 💰 Cost Breakdown
-
-### Free Tier Limits
-- **Firestore:** 50K reads, 20K writes per day
-- **Auth:** 50K MAU (Monthly Active Users)
-- **Hosting:** 10GB storage, 360MB/day transfer
-
-### With Optimization
-- **Daily Reads:** ~500-1,000 (< 2% of limit)
-- **Daily Writes:** ~100-200 (< 1% of limit)
-- **Monthly Cost:** **$0.00** 🎉
-
-## 📚 Documentation
-
-- [Firebase Setup Guide](./FIREBASE_SETUP.md) - Complete setup instructions
-- [Cost Optimization Tips](./FIREBASE_SETUP.md#-cost-saving-strategies-implemented)
-- [Security Best Practices](./FIREBASE_SETUP.md#-security-best-practices)
-
-## 🎓 Usage Examples
-
-### Authentication
-```typescript
-import { signInAnonymous, useAuth } from './firebase';
-
-function MyComponent() {
-  const { user, loading } = useAuth();
-  
-  const handleSignIn = async () => {
-    await signInAnonymous(); // Free, unlimited
-  };
-  
-  return user ? <div>Signed in!</div> : <Button onClick={handleSignIn}>Sign In</Button>;
-}
-```
-
-### Products (Cached)
-```typescript
-import { useProducts } from './firebase';
-
-function ProductList() {
-  const { products, loading, error } = useProducts();
-  
-  // Data cached for 5 minutes
-  return products.map(p => <ProductCard key={p.id} product={p} />);
-}
-```
-
-### Orders (Minimal Writes)
-```typescript
-import { createOrder } from './firebase';
-
-const orderId = await createOrder({
-  userId: user?.uid,
-  items: cartItems,
-  total: 99.99,
-  customerInfo: { name, phone }
-});
-```
-
-## 🚀 Deployment
-
-### Firebase Hosting (Free)
-```bash
-npm run build
-firebase deploy
-```
-
-### Other Platforms
-- **Vercel:** Connect GitHub repo
-- **Netlify:** Connect GitHub repo
-- **Cloudflare Pages:** Connect GitHub repo
-
-All support Firebase without extra cost!
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Keep cost optimizations intact
-2. Test with Firebase before submitting
-3. Update documentation if needed
-
-## 📄 License
-
-MIT
 
 ---
 
-## React + TypeScript + Vite
+## 📝 Guia do Administrador
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Para detalhes sobre como gerenciar a loja, produtos e configurações, consulte o [Guia do Administrador](./ADMIN_GUIDE.md).
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📄 Licença
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.

@@ -16,43 +16,93 @@ import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import Modal from '@mui/joy/Modal';
 import ModalDialog from '@mui/joy/ModalDialog';
+import CircularProgress from '@mui/joy/CircularProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useStoreSettings } from '../context/useStoreSettings';
+import { DEFAULT_PRODUCT_IMAGE } from '../supabase/storage';
 
 export default function CartPage() {
   const navigate = useNavigate();
   const { items, updateQuantity, removeFromCart, total, clearCart } = useCart();
+  const { settings } = useStoreSettings();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   
   // Form states
   const [name, setName] = React.useState('');
   const [phone, setPhone] = React.useState('');
-  const [address, setAddress] = React.useState('');
+  const [cep, setCep] = React.useState('');
+  const [street, setStreet] = React.useState('');
+  const [number, setNumber] = React.useState('');
+  const [complement, setComplement] = React.useState('');
+  const [neighborhood, setNeighborhood] = React.useState('');
+  const [city, setCity] = React.useState('');
+  const [state, setState] = React.useState('');
+  const [cepLoading, setCepLoading] = React.useState(false);
+  const [cepError, setCepError] = React.useState('');
   const [checkoutStep, setCheckoutStep] = React.useState<'cart' | 'form' | 'summary'>('cart');
 
+  const fullAddress = [street, number, complement, neighborhood, city && state ? `${city} - ${state}` : city || state, cep].filter(Boolean).join(', ');
+
+  const lookupCep = async (rawCep: string) => {
+    const cleanCep = rawCep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+    setCepLoading(true);
+    setCepError('');
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        setCepError('CEP não encontrado');
+        return;
+      }
+      setStreet(data.logradouro || '');
+      setNeighborhood(data.bairro || '');
+      setCity(data.localidade || '');
+      setState(data.uf || '');
+    } catch {
+      setCepError('Erro ao buscar CEP');
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
+    setCep(v);
+    if (v.replace(/\D/g, '').length === 8) {
+      lookupCep(v);
+    }
+  };
+
   const handleCheckout = () => {
-    // Format message for WhatsApp
+    const itemLines = items.map(item => {
+      const hasDiscount = item.originalPrice && item.originalPrice > item.price;
+      const linePrice = `R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`;
+      const orig = hasDiscount ? ` (era R$ ${item.originalPrice!.toFixed(2).replace('.', ',')})` : '';
+      return `• ${item.quantity}x ${item.name} - ${linePrice}${orig}`;
+    }).join('\n');
+
     const message = encodeURIComponent(
-      `*Novo Pedido - Peixe Shop*\n\n` +
+      `*Novo Pedido - ${settings.storeName} ${settings.storeSubname}*\n\n` +
       `*Cliente:* ${name}\n` +
       `*WhatsApp:* ${phone}\n` +
-      `*Endereço:* ${address}\n\n` +
-      `*Pedido:*\n${items.map(item => `• ${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2)}`).join('\n')}\n\n` +
-      `*Total:* R$ ${total.toFixed(2)}\n\n` +
-      `*Entrega:* Retirar na Loja (Rua dos Peixes, 123)\n` +
-      `*Horário de Retirada:* Seg a Sex, 09h às 19h`
+      `*Endereço:* ${fullAddress}\n\n` +
+      `*Pedido:*\n${itemLines}\n\n` +
+      `*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
+      `*Entrega:* Retirar na Loja (${settings.address})\n` +
+      `*Horário de Retirada:* ${settings.openingHours}`
     );
     
-    const whatsappUrl = `https://wa.me/5512996707238?text=${message}`;
+    const whatsappUrl = `https://wa.me/${settings.phone}?text=${message}`;
     
     setOpenSuccess(true);
-    
-    // Open WhatsApp in a new tab
     window.open(whatsappUrl, '_blank');
 
     setTimeout(() => {
@@ -61,6 +111,8 @@ export default function CartPage() {
       navigate('/');
     }, 3000);
   };
+
+  const formValid = name && phone && cep.replace(/\D/g, '').length === 8 && street && number && city;
 
   if (items.length === 0) {
     return (
@@ -74,53 +126,67 @@ export default function CartPage() {
   const renderCart = () => (
     <>
       <Box sx={{ p: 2 }}>
-        {items.map((item) => (
-          <Sheet key={item.id} variant="outlined" sx={{ mb: 2, borderRadius: 'md', overflow: 'hidden' }}>
-            <Box sx={{ display: 'flex', p: 2, gap: 2 }}>
-              <AspectRatio ratio="1" sx={{ width: 80, borderRadius: 'sm' }}>
-                <img src={item.image} alt={item.name} />
-              </AspectRatio>
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Typography level="title-md">{item.name}</Typography>
-                  <IconButton 
-                    size="sm" 
-                    color="danger" 
-                    variant="plain"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    <DeleteOutlineIcon />
-                  </IconButton>
-                </Box>
-                <Typography level="body-sm" textColor="success.plainColor" sx={{ mb: 1 }}>
-                  R$ {item.price.toFixed(2).replace('.', ',')} / un
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, border: '1px solid', borderColor: 'neutral.outlinedBorder', borderRadius: 'sm', p: 0.5 }}>
+        {items.map((item) => {
+          const hasDiscount = item.originalPrice && item.originalPrice > item.price;
+          return (
+            <Sheet key={item.id} variant="outlined" sx={{ mb: 2, borderRadius: 'md', overflow: 'hidden' }}>
+              <Box sx={{ display: 'flex', p: 2, gap: 2 }}>
+                <AspectRatio ratio="1" sx={{ width: 80, borderRadius: 'sm' }}>
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                  />
+                </AspectRatio>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Typography level="title-md">{item.name}</Typography>
                     <IconButton 
                       size="sm" 
+                      color="danger" 
                       variant="plain"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => removeFromCart(item.id)}
                     >
-                      <RemoveIcon fontSize="small" />
-                    </IconButton>
-                    <Typography>{item.quantity}</Typography>
-                    <IconButton 
-                      size="sm" 
-                      variant="plain"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      <AddIcon fontSize="small" />
+                      <DeleteOutlineIcon />
                     </IconButton>
                   </Box>
-                  <Typography level="title-md" textColor="success.plainColor">
-                    R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    {hasDiscount && (
+                      <Typography level="body-xs" sx={{ textDecoration: 'line-through', color: 'text.tertiary' }}>
+                        R$ {item.originalPrice!.toFixed(2).replace('.', ',')}
+                      </Typography>
+                    )}
+                    <Typography level="body-sm" sx={{ color: hasDiscount ? 'danger.500' : 'success.plainColor', fontWeight: hasDiscount ? 700 : 400 }}>
+                      R$ {item.price.toFixed(2).replace('.', ',')} / {item.unit || 'un'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, border: '1px solid', borderColor: 'neutral.outlinedBorder', borderRadius: 'sm', p: 0.5 }}>
+                      <IconButton 
+                        size="sm" 
+                        variant="plain"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      >
+                        <RemoveIcon fontSize="small" />
+                      </IconButton>
+                      <Typography>{item.quantity}</Typography>
+                      <IconButton 
+                        size="sm" 
+                        variant="plain"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      >
+                        <AddIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <Typography level="title-md" sx={{ color: hasDiscount ? 'danger.500' : 'success.plainColor' }}>
+                      R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
-            </Box>
-          </Sheet>
-        ))}
+            </Sheet>
+          );
+        })}
 
         <Sheet variant="soft" color="neutral" sx={{ p: 2, borderRadius: 'md' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -176,23 +242,89 @@ export default function CartPage() {
         <FormLabel>WhatsApp / Telefone</FormLabel>
         <Input 
           startDecorator={<PhoneIcon />} 
-          placeholder="Ex: 12 99999-9999" 
+          placeholder="Ex: (27) 99999-9999" 
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           required
         />
       </FormControl>
 
-      <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Seu Endereço</FormLabel>
+      <Divider sx={{ my: 2 }} />
+      <Typography level="title-md" sx={{ mb: 2 }}>Endereço</Typography>
+
+      <FormControl sx={{ mb: 2 }}>
+        <FormLabel>CEP</FormLabel>
         <Input 
-          startDecorator={<LocationOnIcon />} 
-          placeholder="Rua, Número, Bairro" 
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          startDecorator={cepLoading ? <CircularProgress size="sm" /> : <SearchIcon />}
+          placeholder="00000-000"
+          value={cep}
+          onChange={handleCepChange}
+          error={!!cepError}
           required
         />
+        {cepError && (
+          <Typography level="body-xs" color="danger" sx={{ mt: 0.5 }}>{cepError}</Typography>
+        )}
       </FormControl>
+
+      <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+        <FormControl sx={{ flex: 3 }}>
+          <FormLabel>Rua</FormLabel>
+          <Input 
+            placeholder="Rua / Avenida" 
+            value={street} 
+            onChange={(e) => setStreet(e.target.value)} 
+            required 
+          />
+        </FormControl>
+        <FormControl sx={{ flex: 1 }}>
+          <FormLabel>Nº</FormLabel>
+          <Input 
+            placeholder="123" 
+            value={number} 
+            onChange={(e) => setNumber(e.target.value)} 
+            required 
+          />
+        </FormControl>
+      </Box>
+
+      <FormControl sx={{ mb: 2 }}>
+        <FormLabel>Complemento</FormLabel>
+        <Input 
+          placeholder="Apto, Bloco... (opcional)" 
+          value={complement} 
+          onChange={(e) => setComplement(e.target.value)} 
+        />
+      </FormControl>
+
+      <FormControl sx={{ mb: 2 }}>
+        <FormLabel>Bairro</FormLabel>
+        <Input 
+          placeholder="Bairro" 
+          value={neighborhood} 
+          onChange={(e) => setNeighborhood(e.target.value)} 
+        />
+      </FormControl>
+
+      <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
+        <FormControl sx={{ flex: 3 }}>
+          <FormLabel>Cidade</FormLabel>
+          <Input 
+            placeholder="Cidade" 
+            value={city} 
+            onChange={(e) => setCity(e.target.value)} 
+            required 
+          />
+        </FormControl>
+        <FormControl sx={{ flex: 1 }}>
+          <FormLabel>UF</FormLabel>
+          <Input 
+            placeholder="ES" 
+            value={state} 
+            onChange={(e) => setState(e.target.value.toUpperCase().slice(0, 2))} 
+          />
+        </FormControl>
+      </Box>
 
       <Divider sx={{ my: 3 }} />
 
@@ -204,12 +336,12 @@ export default function CartPage() {
           <Typography level="title-md">Retirar na Loja (Única Opção)</Typography>
         </Box>
         <Typography level="body-sm" sx={{ mb: 1 }}>
-          Rua dos Peixes, 123 - Centro, São José dos Campos
+          {settings.address} - {settings.addressCity}, {settings.addressState}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <AccessTimeIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
           <Typography level="body-xs" fontWeight="bold">
-            Aberto: Seg a Sex, 09:00 às 19:00
+            Aberto: {settings.openingHours}
           </Typography>
         </Box>
       </Sheet>
@@ -232,7 +364,7 @@ export default function CartPage() {
           onClick={() => setCheckoutStep('summary')}
           variant="solid"
           color="success"
-          disabled={!name || !phone || !address}
+          disabled={!formValid}
         >
           Ver Resumo
         </Button>
@@ -248,17 +380,29 @@ export default function CartPage() {
         <Typography level="title-sm" textColor="text.tertiary" sx={{ mb: 1 }}>CLIENTE</Typography>
         <Typography level="body-md"><strong>{name}</strong></Typography>
         <Typography level="body-sm">{phone}</Typography>
-        <Typography level="body-sm">{address}</Typography>
+        <Typography level="body-sm">{fullAddress}</Typography>
       </Sheet>
 
       <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md', mb: 3 }}>
         <Typography level="title-sm" textColor="text.tertiary" sx={{ mb: 1 }}>ITENS</Typography>
-        {items.map(item => (
-          <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography level="body-sm">{item.quantity}x {item.name}</Typography>
-            <Typography level="body-sm">R$ {(item.price * item.quantity).toFixed(2)}</Typography>
-          </Box>
-        ))}
+        {items.map(item => {
+          const hasDiscount = item.originalPrice && item.originalPrice > item.price;
+          return (
+            <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography level="body-sm">{item.quantity}x {item.name}</Typography>
+              <Box sx={{ textAlign: 'right' }}>
+                {hasDiscount && (
+                  <Typography level="body-xs" sx={{ textDecoration: 'line-through', color: 'text.tertiary' }}>
+                    R$ {(item.originalPrice! * item.quantity).toFixed(2).replace('.', ',')}
+                  </Typography>
+                )}
+                <Typography level="body-sm" sx={{ color: hasDiscount ? 'danger.500' : undefined }}>
+                  R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                </Typography>
+              </Box>
+            </Box>
+          );
+        })}
         <Divider sx={{ my: 1.5 }} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography level="title-md">Total</Typography>
@@ -269,8 +413,8 @@ export default function CartPage() {
       <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md', mb: 3 }}>
         <Typography level="title-sm" textColor="text.tertiary" sx={{ mb: 1 }}>ENTREGA</Typography>
         <Typography level="body-md"><strong>Retirar na Loja</strong></Typography>
-        <Typography level="body-sm">Rua dos Peixes, 123</Typography>
-        <Typography level="body-xs" sx={{ mt: 1 }}>Horário: Seg a Sex, 09:00 às 19:00</Typography>
+        <Typography level="body-sm">{settings.address} - {settings.addressCity}, {settings.addressState}</Typography>
+        <Typography level="body-xs" sx={{ mt: 1 }}>Horário: {settings.openingHours}</Typography>
       </Sheet>
 
       <Sheet

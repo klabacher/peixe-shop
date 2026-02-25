@@ -6,6 +6,7 @@ import CssBaseline from '@mui/joy/CssBaseline';
 import theme from './theme';
 import { BrowserRouter } from "react-router-dom";
 import { CartProvider } from './context/CartContext';
+import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import { initializeFirebase } from './firebase';
 
 // Initialize Firebase with cost-saving configurations
@@ -15,11 +16,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <CssVarsProvider theme={theme}>
       <CssBaseline />
-      <CartProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </CartProvider>
+      <StoreSettingsProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </CartProvider>
+      </StoreSettingsProvider>
     </CssVarsProvider>
   </React.StrictMode>,
 );

@@ -12,18 +12,23 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
     
-    // Admin check - add your admin emails here
+    // Admin check
     function isAdmin() {
       return isSignedIn() && 
              request.auth.token.email != null &&
-             (request.auth.token.email == 'admin@peixeshop.com' ||
-              request.auth.token.email == 'admin@example.com');
+             request.auth.token.email == 'admin@vigano.com.br';
     }
     
     // Products collection
     match /products/{productId} {
-      allow read: if true; // Public read access
-      allow create, update, delete: if isAdmin(); // Admin only writes
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Store settings
+    match /settings/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
     
     // Orders collection - Users can only create and read their own orders

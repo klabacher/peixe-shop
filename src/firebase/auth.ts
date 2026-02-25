@@ -1,16 +1,17 @@
 import { 
   signInAnonymously,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  updatePassword as firebaseUpdatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   type User
 } from 'firebase/auth';
 import { auth } from './config';
 
 export type { User };
 
-// Anonymous Auth (ZERO COST - no user data stored)
 export async function signInAnonymous() {
   try {
     const userCredential = await signInAnonymously(auth);
@@ -21,7 +22,6 @@ export async function signInAnonymous() {
   }
 }
 
-// Email/Password Auth (minimal usage recommended)
 export async function signInWithEmail(email: string, password: string) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -32,14 +32,13 @@ export async function signInWithEmail(email: string, password: string) {
   }
 }
 
-export async function signUpWithEmail(email: string, password: string) {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
-  } catch (error) {
-    console.error('Sign-up error:', error);
-    throw error;
-  }
+export async function changeAdminPassword(currentPassword: string, newPassword: string) {
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error('Nenhum usuário autenticado');
+  
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await firebaseUpdatePassword(user, newPassword);
 }
 
 export async function signOut() {

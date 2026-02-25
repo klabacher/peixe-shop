@@ -7,9 +7,11 @@ import AspectRatio from '@mui/joy/AspectRatio';
 import Button from '@mui/joy/Button';
 import Box from '@mui/joy/Box';
 import IconButton from '@mui/joy/IconButton';
+import Chip from '@mui/joy/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import Sheet from '@mui/joy/Sheet';
+import { DEFAULT_PRODUCT_IMAGE } from '../supabase';
 import type { Product } from '../types/product';
 
 interface ProductModalProps {
@@ -35,6 +37,12 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
     onClose();
   };
 
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    : 0;
+  const totalPrice = product.price * quantity;
+
   return (
     <Modal open={open} onClose={onClose}>
       <ModalDialog 
@@ -51,7 +59,6 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
           maxHeight: '90vh'
         }}
       >
-        {/* Botão de Fechar Ergonômico e Destacado */}
         <ModalClose 
           variant="solid" 
           sx={{ 
@@ -64,20 +71,67 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
           }} 
         />
         
-        {/* Área de Scroll para o Conteúdo */}
         <Box sx={{ overflowY: 'auto', flex: 1, pb: 10 }}>
-          <AspectRatio ratio="4/3" sx={{ width: '100%' }}>
-            <img
-              src={product.image}
-              alt={product.name}
-              style={{ objectFit: 'cover' }}
-            />
-          </AspectRatio>
+          <Box sx={{ position: 'relative' }}>
+            <AspectRatio ratio="4/3" sx={{ width: '100%' }}>
+              <img
+                src={product.image}
+                alt={product.name}
+                style={{ objectFit: 'cover' }}
+                onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+              />
+            </AspectRatio>
+            {hasDiscount && (
+              <Chip
+                color="danger"
+                variant="solid"
+                size="lg"
+                sx={{
+                  position: 'absolute',
+                  top: 16,
+                  left: 16,
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                }}
+              >
+                -{discountPercent}% OFF
+              </Chip>
+            )}
+          </Box>
 
           <Box sx={{ p: 3 }}>
             <Typography level="h3" sx={{ mb: 1, fontSize: '1.5rem', fontWeight: 800 }}>
               {product.name}
             </Typography>
+
+            {/* Pricing section */}
+            <Box sx={{ mb: 2 }}>
+              {hasDiscount ? (
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, flexWrap: 'wrap' }}>
+                  <Box>
+                    <Typography level="body-xs" sx={{ color: 'text.tertiary', mb: 0.25 }}>De</Typography>
+                    <Typography level="body-md" sx={{ textDecoration: 'line-through', color: 'neutral.400' }}>
+                      R$ {product.originalPrice!.toFixed(2).replace('.', ',')}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography level="body-xs" sx={{ color: 'danger.500', fontWeight: 600, mb: 0.25 }}>Por</Typography>
+                    <Typography level="h3" sx={{ color: 'danger.500', fontWeight: 800 }}>
+                      R$ {product.price.toFixed(2).replace('.', ',')}
+                    </Typography>
+                  </Box>
+                </Box>
+              ) : (
+                <Typography level="h3" sx={{ color: 'primary.500', fontWeight: 800 }}>
+                  R$ {product.price.toFixed(2).replace('.', ',')}
+                </Typography>
+              )}
+              {product.unit && (
+                <Typography level="body-xs" sx={{ color: 'text.tertiary', mt: 0.5 }}>
+                  por {product.unit}
+                </Typography>
+              )}
+            </Box>
             
             <Typography level="body-lg" sx={{ color: 'text.secondary', lineHeight: 1.6, mb: 2 }}>
               {product.description}
@@ -89,7 +143,6 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
           </Box>
         </Box>
 
-        {/* Sticky Footer (Rodapé Fixo) para Ação de Compra */}
         <Sheet
           sx={{ 
             p: 2, 
@@ -130,10 +183,10 @@ export default function ProductModal({ open, onClose, product, onAddToCart }: Pr
             fullWidth 
             size="lg"
             onClick={handleAddToCart}
-            color="danger"
+            color={hasDiscount ? 'danger' : 'primary'}
             sx={{ flex: 1 }}
           >
-            Adicionar • R$ {(product.price * quantity).toFixed(2).replace('.', ',')}
+            Adicionar • R$ {totalPrice.toFixed(2).replace('.', ',')}
           </Button>
         </Sheet>
       </ModalDialog>

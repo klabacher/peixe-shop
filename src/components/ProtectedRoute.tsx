@@ -6,11 +6,8 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-// Simple admin check - user must be authenticated with specific email
 const ADMIN_EMAILS = [
-  'admin@peixeshop.com',
-  'admin@example.com',
-  // Add your admin emails here
+  'admin@vigano.com.br',
 ];
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {

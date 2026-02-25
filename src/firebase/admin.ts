@@ -4,10 +4,12 @@ import {
   addDoc, 
   updateDoc, 
   deleteDoc,
+  setDoc,
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from './config';
 import { clearFirestoreCache } from './firestore';
+import type { StoreSettings } from '../types/product';
 
 // Create Product (Admin only - validated by security rules)
 export async function createProduct(productData: {
@@ -65,4 +67,15 @@ export async function updateStock(productId: string, newStock: number) {
 export async function batchUpdateStock(updates: Array<{ id: string; stock: number }>) {
   const promises = updates.map(({ id, stock }) => updateStock(id, stock));
   await Promise.all(promises);
+}
+
+// Update Store Settings (Admin only)
+export async function updateStoreSettings(settings: Partial<StoreSettings>): Promise<void> {
+  const docRef = doc(db, 'settings', 'store');
+  await setDoc(docRef, {
+    ...settings,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+  
+  clearFirestoreCache();
 }

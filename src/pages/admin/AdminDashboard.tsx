@@ -21,6 +21,7 @@ import ProductForm from '../../components/admin/ProductForm';
 import ProductList from '../../components/admin/ProductList';
 import CategoryManager from '../../components/admin/CategoryManager';
 import SeedDatabaseButton from '../../components/admin/SeedDatabaseButton';
+import AdminSettings from './AdminSettings';
 import type { Product } from '../../types/product';
 
 export default function AdminDashboard() {
@@ -288,6 +289,7 @@ export default function AdminDashboard() {
             <TabList variant="soft" sx={{ mb: 2, gap: 1 }}>
               <Tab>Produtos</Tab>
               <Tab>Categorias</Tab>
+              <Tab>Configurações</Tab>
             </TabList>
 
             <TabPanel value={0} sx={{ p: 0 }}>
@@ -296,6 +298,10 @@ export default function AdminDashboard() {
 
             <TabPanel value={1} sx={{ p: 0 }}>
               <CategoryManager products={products} />
+            </TabPanel>
+
+            <TabPanel value={2} sx={{ p: 0 }}>
+              <AdminSettings />
             </TabPanel>
           </Tabs>
         </Sheet>

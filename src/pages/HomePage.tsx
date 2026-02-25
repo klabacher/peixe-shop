@@ -15,6 +15,7 @@ import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import ProductModal from '../components/ProductModal';
 import LogoSection from '../components/LogoSection';
+import StoreFooter from '../components/StoreFooter';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../firebase/hooks';
 import type { Product } from '../types/product';
@@ -279,7 +280,7 @@ export default function HomePage() {
                 onClick={() => heroProduct && handleProductClick(heroProduct)}
                 disabled={!heroProduct}
               >
-                Ver card
+                Sobre
               </Button>
               <Button
                 variant='soft'
@@ -341,6 +342,8 @@ export default function HomePage() {
           </Grid>
         )}
       </Box>
+
+      <StoreFooter />
 
       <ProductModal
         open={!!selectedProduct}

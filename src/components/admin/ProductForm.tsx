@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   ModalDialog,
@@ -15,13 +15,22 @@ import {
   Switch,
   Grid,
   Divider,
+  Alert,
+  AspectRatio,
+  Sheet,
 } from '@mui/joy';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ImageIcon from '@mui/icons-material/Image';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { createProduct, updateProduct } from '../../firebase/admin';
+import { uploadImage, DEFAULT_PRODUCT_IMAGE } from '../../supabase';
+import { clearFirestoreCache } from '../../firebase/firestore';
 
 interface ProductFormProps {
   open: boolean;
   onClose: () => void;
   product?: any;
+  onSaved?: () => void;
 }
 
 const CATEGORIES = [
@@ -35,8 +44,13 @@ const CATEGORIES = [
 
 const UNITS = ['kg', 'un', 'kit', 'pacote', 'litro'];
 
-export default function ProductForm({ open, onClose, product }: ProductFormProps) {
+export default function ProductForm({ open, onClose, product, onSaved }: ProductFormProps) {
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     category: 'Peixes',
@@ -62,18 +76,66 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
         image: product.image || '',
         isBestSeller: product.isBestSeller || false,
       });
+      setImagePreview(product.image || '');
+    } else {
+      setFormData({
+        name: '',
+        category: 'Peixes',
+        price: '',
+        originalPrice: '',
+        unit: 'kg',
+        description: '',
+        stock: '',
+        image: '',
+        isBestSeller: false,
+      });
+      setImagePreview('');
     }
-  }, [product]);
+    setImageFile(null);
+    setUploadProgress('');
+  }, [product, open]);
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Apenas imagens são permitidas');
+      return;
+    }
+
+    setImageFile(file);
+    const url = URL.createObjectURL(file);
+    setImagePreview(url);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setUploadProgress('');
 
     try {
+      let imageUrl = formData.image || DEFAULT_PRODUCT_IMAGE;
+
+      // Upload new image if selected
+      if (imageFile) {
+        setUploadProgress('Enviando imagem...');
+        imageUrl = await uploadImage(imageFile, 'products');
+        setUploadProgress('Imagem enviada!');
+      }
+
       const productData = {
         name: formData.name,
         category: formData.category,
@@ -84,52 +146,142 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
         unit: formData.unit,
         description: formData.description,
         stock: parseInt(formData.stock),
-        image: formData.image || '/images/placeholder.jpg',
+        image: imageUrl,
         isBestSeller: formData.isBestSeller,
       };
 
       if (product?.id) {
         await updateProduct(product.id, productData);
-        alert('Product updated successfully!');
       } else {
         await createProduct(productData);
-        alert('Product created successfully!');
       }
 
+      clearFirestoreCache();
       onClose();
-      // Force refresh
-      window.location.reload();
+      if (onSaved) {
+        onSaved();
+      } else {
+        window.location.reload();
+      }
     } catch (error: any) {
-      alert(`Error: ${error.message}`);
+      alert(`Erro: ${error.message}`);
     } finally {
       setLoading(false);
+      setUploadProgress('');
     }
   };
 
+  const hasNoImage = !imageFile && !formData.image;
+
   return (
     <Modal open={open} onClose={onClose}>
-      <ModalDialog sx={{ minWidth: 600, maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto' }}>
+      <ModalDialog sx={{ minWidth: { xs: '95vw', sm: 600 }, maxWidth: '95vw', maxHeight: '90vh', overflow: 'auto' }}>
         <ModalClose />
         <Typography level="h4" sx={{ mb: 2 }}>
-          {product ? 'Edit Product' : 'Add New Product'}
+          {product ? 'Editar Produto' : 'Novo Produto'}
         </Typography>
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
+            {/* Image Upload */}
+            <Grid xs={12}>
+              <FormLabel sx={{ mb: 1 }}>Imagem do Produto</FormLabel>
+              <Sheet
+                variant="outlined"
+                sx={{
+                  borderRadius: 'lg',
+                  p: 2,
+                  borderStyle: 'dashed',
+                  borderWidth: 2,
+                  borderColor: imagePreview ? 'primary.300' : 'neutral.300',
+                  cursor: 'pointer',
+                  transition: '0.2s',
+                  '&:hover': { borderColor: 'primary.500', bgcolor: 'primary.50' },
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={(e: React.DragEvent) => e.preventDefault()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileSelect}
+                />
+                {imagePreview ? (
+                  <AspectRatio ratio="16/9" sx={{ borderRadius: 'md', overflow: 'hidden' }}>
+                    <img src={imagePreview} alt="Preview" style={{ objectFit: 'cover' }} />
+                  </AspectRatio>
+                ) : (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 3, gap: 1 }}>
+                    <CloudUploadIcon sx={{ fontSize: 40, color: 'neutral.400' }} />
+                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                      Clique ou arraste uma imagem aqui
+                    </Typography>
+                    <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>
+                      PNG, JPG ou WebP • Máx. 5MB
+                    </Typography>
+                  </Box>
+                )}
+              </Sheet>
+              {hasNoImage && (
+                <Alert
+                  variant="soft"
+                  color="neutral"
+                  size="sm"
+                  startDecorator={<InfoOutlinedIcon />}
+                  sx={{ mt: 1 }}
+                >
+                  <span>Uma imagem padrão será utilizada caso nenhuma seja selecionada.</span>
+                </Alert>
+              )}
+              {imagePreview && (
+                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                  <Button
+                    size="sm"
+                    variant="soft"
+                    color="neutral"
+                    startDecorator={<ImageIcon />}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Trocar imagem
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="soft"
+                    color="danger"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview('');
+                      handleChange('image', '');
+                    }}
+                  >
+                    Remover
+                  </Button>
+                </Box>
+              )}
+              {uploadProgress && (
+                <Typography level="body-xs" sx={{ mt: 0.5, color: 'primary.500' }}>
+                  {uploadProgress}
+                </Typography>
+              )}
+            </Grid>
+
             <Grid xs={12}>
               <FormControl required>
-                <FormLabel>Product Name</FormLabel>
+                <FormLabel>Nome do Produto</FormLabel>
                 <Input
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
-                  placeholder="e.g., Salmão Fresco"
+                  placeholder="Ex: Salmão Fresco"
                 />
               </FormControl>
             </Grid>
 
             <Grid xs={12} sm={6}>
               <FormControl required>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Categoria</FormLabel>
                 <Select
                   value={formData.category}
                   onChange={(_, value) => handleChange('category', value)}
@@ -145,7 +297,7 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
 
             <Grid xs={12} sm={6}>
               <FormControl required>
-                <FormLabel>Unit</FormLabel>
+                <FormLabel>Unidade</FormLabel>
                 <Select
                   value={formData.unit}
                   onChange={(_, value) => handleChange('unit', value)}
@@ -161,14 +313,10 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
 
             <Grid xs={12} sm={6}>
               <FormControl required>
-                <FormLabel>Price (R$)</FormLabel>
+                <FormLabel>Preço (R$)</FormLabel>
                 <Input
                   type="number"
-                  slotProps={{
-                    input: {
-                      step: '0.01',
-                    },
-                  }}
+                  slotProps={{ input: { step: '0.01' } }}
                   value={formData.price}
                   onChange={(e) => handleChange('price', e.target.value)}
                   placeholder="89.90"
@@ -178,14 +326,10 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
 
             <Grid xs={12} sm={6}>
               <FormControl>
-                <FormLabel>Original Price (R$) - Optional</FormLabel>
+                <FormLabel>Preço Original (R$) - Opcional</FormLabel>
                 <Input
                   type="number"
-                  slotProps={{
-                    input: {
-                      step: '0.01',
-                    },
-                  }}
+                  slotProps={{ input: { step: '0.01' } }}
                   value={formData.originalPrice}
                   onChange={(e) => handleChange('originalPrice', e.target.value)}
                   placeholder="99.90"
@@ -195,7 +339,7 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
 
             <Grid xs={12}>
               <FormControl required>
-                <FormLabel>Stock Quantity</FormLabel>
+                <FormLabel>Estoque</FormLabel>
                 <Input
                   type="number"
                   value={formData.stock}
@@ -207,23 +351,12 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
 
             <Grid xs={12}>
               <FormControl required>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Descrição</FormLabel>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
-                  placeholder="Product description..."
+                  placeholder="Descrição do produto..."
                   minRows={3}
-                />
-              </FormControl>
-            </Grid>
-
-            <Grid xs={12}>
-              <FormControl>
-                <FormLabel>Image URL - Optional</FormLabel>
-                <Input
-                  value={formData.image}
-                  onChange={(e) => handleChange('image', e.target.value)}
-                  placeholder="/images/product.jpg"
                 />
               </FormControl>
             </Grid>
@@ -231,9 +364,9 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
             <Grid xs={12}>
               <FormControl orientation="horizontal" sx={{ justifyContent: 'space-between' }}>
                 <Box>
-                  <FormLabel>Best Seller</FormLabel>
+                  <FormLabel>Mais Vendido</FormLabel>
                   <Typography level="body-sm">
-                    Show this product in "Mais Pedidos"
+                    Exibir em "Mais Pedidos"
                   </Typography>
                 </Box>
                 <Switch
@@ -248,10 +381,10 @@ export default function ProductForm({ open, onClose, product }: ProductFormProps
 
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
             <Button variant="plain" onClick={onClose}>
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" loading={loading}>
-              {product ? 'Update' : 'Create'} Product
+              {product ? 'Atualizar' : 'Criar'} Produto
             </Button>
           </Box>
         </form>

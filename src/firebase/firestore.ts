@@ -8,9 +8,11 @@ import {
   where,
   orderBy,
   limit,
-  writeBatch
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
+import type { StoreSettings } from '../types/product';
+import { DEFAULT_STORE_SETTINGS } from '../types/product';
 
 // In-memory cache to reduce Firestore reads (EXTREME COST SAVING)
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -119,4 +121,24 @@ export async function batchUpdateProducts(updates: Array<{ id: string; data: any
 // Clear cache manually if needed
 export function clearFirestoreCache() {
   cache.clear();
+}
+
+// Store Settings
+export async function getStoreSettings(): Promise<StoreSettings> {
+  const cacheKey = 'store_settings';
+  const cached = getCached<StoreSettings>(cacheKey);
+  if (cached) return cached;
+
+  const docRef = doc(db, 'settings', 'store');
+  const snapshot = await getDoc(docRef);
+  
+  if (!snapshot.exists()) {
+    // Return defaults if not yet configured
+    setCache(cacheKey, DEFAULT_STORE_SETTINGS);
+    return DEFAULT_STORE_SETTINGS;
+  }
+  
+  const settings = { ...DEFAULT_STORE_SETTINGS, ...snapshot.data() } as StoreSettings;
+  setCache(cacheKey, settings);
+  return settings;
 }

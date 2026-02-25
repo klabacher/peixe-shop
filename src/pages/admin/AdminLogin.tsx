@@ -10,13 +10,13 @@ import {
   Typography,
   Alert,
 } from '@mui/joy';
-import { signInWithEmail, signUpWithEmail } from '../../firebase';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { signInWithEmail } from '../../firebase';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,14 +26,16 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        await signUpWithEmail(email, password);
-      } else {
-        await signInWithEmail(email, password);
-      }
+      await signInWithEmail(email, password);
       navigate('/admin/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(
+        err.code === 'auth/invalid-credential'
+          ? 'Email ou senha incorretos.'
+          : err.code === 'auth/too-many-requests'
+          ? 'Muitas tentativas. Tente novamente mais tarde.'
+          : 'Falha na autenticação. Verifique suas credenciais.'
+      );
     } finally {
       setLoading(false);
     }
@@ -50,16 +52,19 @@ export default function AdminLogin() {
         p: 2,
       }}
     >
-      <Card sx={{ maxWidth: 400, width: '100%', p: 4 }}>
-        <Typography level="h2" sx={{ mb: 1 }}>
-          Admin Login
+      <Card sx={{ maxWidth: 400, width: '100%', p: 4, textAlign: 'center' }}>
+        <Box sx={{ mx: 'auto', mb: 2, width: 56, height: 56, borderRadius: '50%', bgcolor: 'primary.softBg', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <LockOutlinedIcon sx={{ fontSize: 28, color: 'primary.500' }} />
+        </Box>
+        <Typography level="h3" sx={{ mb: 0.5 }}>
+          Painel Administrativo
         </Typography>
-        <Typography level="body-sm" sx={{ mb: 3 }}>
-          {isSignUp ? 'Create admin account' : 'Sign in to manage your shop'}
+        <Typography level="body-sm" sx={{ mb: 3, color: 'text.secondary' }}>
+          Acesse com suas credenciais de administrador
         </Typography>
 
         {error && (
-          <Alert color="danger" sx={{ mb: 2 }}>
+          <Alert color="danger" sx={{ mb: 2, textAlign: 'left' }}>
             {error}
           </Alert>
         )}
@@ -71,13 +76,13 @@ export default function AdminLogin() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@peixeshop.com"
+              placeholder="admin@vigano.com.br"
               required
             />
           </FormControl>
 
           <FormControl sx={{ mb: 3 }}>
-            <FormLabel>Password</FormLabel>
+            <FormLabel>Senha</FormLabel>
             <Input
               type="password"
               value={password}
@@ -87,26 +92,10 @@ export default function AdminLogin() {
             />
           </FormControl>
 
-          <Button type="submit" fullWidth loading={loading} sx={{ mb: 2 }}>
-            {isSignUp ? 'Create Account' : 'Sign In'}
-          </Button>
-
-          <Button
-            variant="plain"
-            fullWidth
-            onClick={() => setIsSignUp(!isSignUp)}
-          >
-            {isSignUp
-              ? 'Already have an account? Sign in'
-              : 'Need an account? Sign up'}
+          <Button type="submit" fullWidth loading={loading} size="lg">
+            Entrar
           </Button>
         </form>
-
-        <Box sx={{ mt: 3, p: 2, bgcolor: 'warning.softBg', borderRadius: 'sm' }}>
-          <Typography level="body-sm" sx={{ color: 'warning.plainColor' }}>
-            ⚠️ Note: Add your email to ADMIN_EMAILS in ProtectedRoute.tsx
-          </Typography>
-        </Box>
       </Card>
     </Box>
   );
