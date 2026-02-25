@@ -1,8 +1,11 @@
 import { Box } from '@mui/joy';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import StoreFooter from './StoreFooter';
 
 export default function CustomerLayout() {
+  const location = useLocation();
+  const showFooter = location.pathname !== '/cart';
+
   return (
     <Box
       sx={{
@@ -15,7 +18,7 @@ export default function CustomerLayout() {
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         <Outlet />
       </Box>
-      <StoreFooter />
+      {showFooter && <StoreFooter />}
     </Box>
   );
 }

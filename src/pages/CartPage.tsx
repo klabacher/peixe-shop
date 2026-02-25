@@ -11,6 +11,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import StoreIcon from '@mui/icons-material/Store';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
@@ -46,6 +47,7 @@ export default function CartPage() {
   const [cepLoading, setCepLoading] = React.useState(false);
   const [cepError, setCepError] = React.useState('');
   const [checkoutStep, setCheckoutStep] = React.useState<'cart' | 'form' | 'summary'>('cart');
+  const [deliveryType, setDeliveryType] = React.useState<'retirada' | 'entrega'>('retirada');
 
   const fullAddress = [street, number, complement, neighborhood, city && state ? `${city} - ${state}` : city || state, cep].filter(Boolean).join(', ');
 
@@ -89,15 +91,17 @@ export default function CartPage() {
       return `• ${item.quantity}x ${item.name} - ${linePrice}${orig}`;
     }).join('\n');
 
+    const entregaLine = deliveryType === 'entrega'
+      ? `*Tipo de Entrega:* 🛵 Entrega a Domicílio\n*Endereço de Entrega:* ${fullAddress}`
+      : `*Tipo de Entrega:* 🏪 Retirar na Loja\n*Endereço da Loja:* ${settings.address} - ${settings.addressCity}, ${settings.addressState}\n*Horário:* ${settings.openingHours}`;
+
     const message = encodeURIComponent(
       `*Novo Pedido - ${settings.storeName} ${settings.storeSubname}*\n\n` +
       `*Cliente:* ${name}\n` +
-      `*WhatsApp:* ${phone}\n` +
-      `*Endereço:* ${fullAddress}\n\n` +
+      `*WhatsApp:* ${phone}\n\n` +
       `*Pedido:*\n${itemLines}\n\n` +
       `*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
-      `*Entrega:* Retirar na Loja (${settings.address})\n` +
-      `*Horário de Retirada:* ${settings.openingHours}`
+      entregaLine
     );
     
     const whatsappUrl = `https://wa.me/${settings.phone}?text=${message}`;
@@ -112,7 +116,9 @@ export default function CartPage() {
     }, 3000);
   };
 
-  const formValid = name && phone && cep.replace(/\D/g, '').length === 8 && street && number && city;
+  const formValid = deliveryType === 'retirada'
+    ? !!(name && phone)
+    : !!(name && phone && cep.replace(/\D/g, '').length === 8 && street && number && city);
 
   if (items.length === 0) {
     return (
@@ -224,7 +230,7 @@ export default function CartPage() {
   );
 
   const renderForm = () => (
-    <Box sx={{ p: 2, pb: 12 }}>
+    <Box sx={{ p: 2 }}>
       <Typography level="h4" sx={{ mb: 3 }}>Identificação</Typography>
       
       <FormControl sx={{ mb: 2 }}>
@@ -250,7 +256,43 @@ export default function CartPage() {
       </FormControl>
 
       <Divider sx={{ my: 2 }} />
-      <Typography level="title-md" sx={{ mb: 2 }}>Endereço</Typography>
+      <Typography level="title-md" sx={{ mb: 2 }}>Tipo de Entrega</Typography>
+
+      <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
+        <Sheet
+          variant={deliveryType === 'retirada' ? 'solid' : 'outlined'}
+          color={deliveryType === 'retirada' ? 'primary' : 'neutral'}
+          onClick={() => setDeliveryType('retirada')}
+          sx={{
+            flex: 1, p: 2, borderRadius: 'md', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5,
+            transition: '0.2s',
+          }}
+        >
+          <StoreIcon />
+          <Typography level="title-sm" sx={{ textAlign: 'center' }}>Retirar na Loja</Typography>
+          <Typography level="body-xs" sx={{ textAlign: 'center', opacity: 0.8 }}>Grátis</Typography>
+        </Sheet>
+        <Sheet
+          variant={deliveryType === 'entrega' ? 'solid' : 'outlined'}
+          color={deliveryType === 'entrega' ? 'primary' : 'neutral'}
+          onClick={() => setDeliveryType('entrega')}
+          sx={{
+            flex: 1, p: 2, borderRadius: 'md', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5,
+            transition: '0.2s',
+          }}
+        >
+          <LocalShippingIcon />
+          <Typography level="title-sm" sx={{ textAlign: 'center' }}>Entrega</Typography>
+          <Typography level="body-xs" sx={{ textAlign: 'center', opacity: 0.8 }}>A combinar</Typography>
+        </Sheet>
+      </Box>
+
+      {deliveryType === 'entrega' && (
+        <>
+      <Divider sx={{ my: 2 }} />
+      <Typography level="title-md" sx={{ mb: 2 }}>Endereço de Entrega</Typography>
 
       <FormControl sx={{ mb: 2 }}>
         <FormLabel>CEP</FormLabel>
@@ -268,7 +310,7 @@ export default function CartPage() {
       </FormControl>
 
       <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-        <FormControl sx={{ flex: 3 }}>
+        <FormControl sx={{ flex: 3, minWidth: 0 }}>
           <FormLabel>Rua</FormLabel>
           <Input 
             placeholder="Rua / Avenida" 
@@ -277,7 +319,7 @@ export default function CartPage() {
             required 
           />
         </FormControl>
-        <FormControl sx={{ flex: 1 }}>
+        <FormControl sx={{ flex: '0 0 80px' }}>
           <FormLabel>Nº</FormLabel>
           <Input 
             placeholder="123" 
@@ -307,7 +349,7 @@ export default function CartPage() {
       </FormControl>
 
       <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
-        <FormControl sx={{ flex: 3 }}>
+        <FormControl sx={{ flex: 3, minWidth: 0 }}>
           <FormLabel>Cidade</FormLabel>
           <Input 
             placeholder="Cidade" 
@@ -316,7 +358,7 @@ export default function CartPage() {
             required 
           />
         </FormControl>
-        <FormControl sx={{ flex: 1 }}>
+        <FormControl sx={{ flex: '0 0 60px' }}>
           <FormLabel>UF</FormLabel>
           <Input 
             placeholder="ES" 
@@ -325,26 +367,26 @@ export default function CartPage() {
           />
         </FormControl>
       </Box>
+        </>
+      )}
 
-      <Divider sx={{ my: 3 }} />
-
-      <Typography level="title-md" sx={{ mb: 2 }}>Opção de Entrega</Typography>
-      
-      <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md', mb: 2, bgcolor: 'primary.softBg' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-          <StoreIcon color="primary" />
-          <Typography level="title-md">Retirar na Loja (Única Opção)</Typography>
-        </Box>
-        <Typography level="body-sm" sx={{ mb: 1 }}>
-          {settings.address} - {settings.addressCity}, {settings.addressState}
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <AccessTimeIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
-          <Typography level="body-xs" fontWeight="bold">
-            Aberto: {settings.openingHours}
+      {deliveryType === 'retirada' && (
+        <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md', mt: 1, bgcolor: 'primary.softBg' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <StoreIcon color="primary" />
+            <Typography level="title-md">Retirar na Loja</Typography>
+          </Box>
+          <Typography level="body-sm" sx={{ mb: 1 }}>
+            {settings.address} - {settings.addressCity}, {settings.addressState}
           </Typography>
-        </Box>
-      </Sheet>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AccessTimeIcon sx={{ fontSize: 18, color: 'text.tertiary' }} />
+            <Typography level="body-xs" fontWeight="bold">
+              Aberto: {settings.openingHours}
+            </Typography>
+          </Box>
+        </Sheet>
+      )}
 
       <Sheet
         variant="solid"
@@ -412,9 +454,19 @@ export default function CartPage() {
 
       <Sheet variant="outlined" sx={{ p: 2, borderRadius: 'md', mb: 3 }}>
         <Typography level="title-sm" textColor="text.tertiary" sx={{ mb: 1 }}>ENTREGA</Typography>
-        <Typography level="body-md"><strong>Retirar na Loja</strong></Typography>
-        <Typography level="body-sm">{settings.address} - {settings.addressCity}, {settings.addressState}</Typography>
-        <Typography level="body-xs" sx={{ mt: 1 }}>Horário: {settings.openingHours}</Typography>
+        {deliveryType === 'retirada' ? (
+          <>
+            <Typography level="body-md"><strong>🏪 Retirar na Loja</strong></Typography>
+            <Typography level="body-sm">{settings.address} - {settings.addressCity}, {settings.addressState}</Typography>
+            <Typography level="body-xs" sx={{ mt: 1 }}>Horário: {settings.openingHours}</Typography>
+          </>
+        ) : (
+          <>
+            <Typography level="body-md"><strong>🛵 Entrega a Domicílio</strong></Typography>
+            <Typography level="body-sm">{fullAddress}</Typography>
+            <Typography level="body-xs" sx={{ mt: 1, color: 'warning.500' }}>Taxa de entrega a combinar com a loja.</Typography>
+          </>
+        )}
       </Sheet>
 
       <Sheet
@@ -436,14 +488,14 @@ export default function CartPage() {
           variant="solid"
           color="success"
         >
-          Finalizar no WhatsApp
+          Enviar no WhatsApp
         </Button>
       </Sheet>
     </Box>
   );
 
   return (
-    <Box sx={{ pb: 12, bgcolor: 'background.body', minHeight: '100vh' }}>
+    <Box sx={{ pb: 24, bgcolor: 'background.body', minHeight: '100vh' }}>
       <Sheet
         variant="solid"
         color="primary"
