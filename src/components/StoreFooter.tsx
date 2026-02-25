@@ -4,6 +4,10 @@ import Sheet from '@mui/joy/Sheet';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import EmailIcon from '@mui/icons-material/Email';
+import LanguageIcon from '@mui/icons-material/Language';
 import { useStoreSettings } from '../context/useStoreSettings';
 
 export default function StoreFooter() {
@@ -29,7 +33,8 @@ export default function StoreFooter() {
       sx={{
         bgcolor: '#0A1929',
         color: 'white',
-        mt: 'auto',
+        // mt: 'auto', // Removed because Layout handles it
+        zIndex: 10, // Ensure it stays on top if needed
       }}
     >
       {/* Map Section */}
@@ -128,12 +133,89 @@ export default function StoreFooter() {
           borderTop: '1px solid rgba(255,255,255,0.1)',
           px: { xs: 2.5, sm: 4 },
           py: 2,
-          textAlign: 'center',
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 2,
         }}
       >
         <Typography level="body-xs" sx={{ color: 'rgba(255,255,255,0.35)' }}>
           © {new Date().getFullYear()} {settings.storeName} {settings.storeSubname}. Todos os direitos reservados.
         </Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography
+            level="body-xs"
+            component="a"
+            href="https://klabacher.dev/"
+            target="_blank"
+            rel="noopener"
+            sx={{
+              color: 'rgba(255,255,255,0.5)',
+              textDecoration: 'none',
+              transition: 'all 0.2s',
+              '&:hover': {
+                color: 'white',
+              },
+            }}
+          >
+            Feito por João Vitor Klabacher
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
+            <Box
+              component="a"
+              href="https://www.linkedin.com/in/joaovitorklabacher/"
+              target="_blank"
+              rel="noopener"
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s',
+                '&:hover': { color: '#0A66C2' },
+              }}
+            >
+              <LinkedInIcon fontSize="small" />
+            </Box>
+            <Box
+              component="a"
+              href="https://github.com/klabacher"
+              target="_blank"
+              rel="noopener"
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s',
+                '&:hover': { color: 'white' },
+              }}
+            >
+              <GitHubIcon fontSize="small" />
+            </Box>
+            <Box
+              component="a"
+              href="mailto:jvklabacher@gmail.com"
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s',
+                '&:hover': { color: '#EA4335' },
+              }}
+            >
+              <EmailIcon fontSize="small" />
+            </Box>
+            <Box
+              component="a"
+              href="https://klabacher.dev/"
+              target="_blank"
+              rel="noopener"
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s',
+                '&:hover': { color: '#4285F4' },
+              }}
+            >
+              <LanguageIcon fontSize="small" />
+            </Box>
+          </Box>
+        </Box>
       </Box>
     </Sheet>
   );
