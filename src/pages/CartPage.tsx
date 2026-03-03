@@ -28,6 +28,14 @@ import { useCart } from '../context/CartContext';
 import { useStoreSettings } from '../context/useStoreSettings';
 import { DEFAULT_PRODUCT_IMAGE } from '../supabase/storage';
 
+const UNIT_PLURALS: Record<string, string> = { kit: 'kits', pacote: 'pacotes', litro: 'litros' };
+
+function fmtQty(qty: number, unit?: string): string {
+  if (!unit || unit === 'un') return `${qty}x`;
+  const u = qty > 1 && UNIT_PLURALS[unit] ? UNIT_PLURALS[unit] : unit;
+  return `${qty} ${u} de`;
+}
+
 export default function CartPage() {
   const navigate = useNavigate();
   const { items, updateQuantity, removeFromCart, total, clearCart } = useCart();
@@ -88,7 +96,7 @@ export default function CartPage() {
       const hasDiscount = item.originalPrice && item.originalPrice > item.price;
       const linePrice = `R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}`;
       const orig = hasDiscount ? ` (era R$ ${item.originalPrice!.toFixed(2).replace('.', ',')})` : '';
-      return `• ${item.quantity}x ${item.name} - ${linePrice}${orig}`;
+      return `• ${fmtQty(item.quantity, item.unit)} ${item.name} - ${linePrice}${orig}`;
     }).join('\n');
 
     const entregaLine = deliveryType === 'entrega'
@@ -431,7 +439,7 @@ export default function CartPage() {
           const hasDiscount = item.originalPrice && item.originalPrice > item.price;
           return (
             <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography level="body-sm">{item.quantity}x {item.name}</Typography>
+              <Typography level="body-sm">{fmtQty(item.quantity, item.unit)} {item.name}</Typography>
               <Box sx={{ textAlign: 'right' }}>
                 {hasDiscount && (
                   <Typography level="body-xs" sx={{ textDecoration: 'line-through', color: 'text.tertiary' }}>
