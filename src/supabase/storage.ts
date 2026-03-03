@@ -1,6 +1,6 @@
 import { supabase } from './config';
 
-const BUCKET = 'public';
+const BUCKET = 'products';
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 /**

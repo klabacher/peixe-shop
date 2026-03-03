@@ -123,6 +123,19 @@ export function clearFirestoreCache() {
   cache.clear();
 }
 
+// Categories
+export async function getStoredCategories(): Promise<string[]> {
+  const cacheKey = 'stored_categories';
+  const cached = getCached<string[]>(cacheKey);
+  if (cached) return cached;
+
+  const docRef = doc(db, 'settings', 'categories');
+  const snapshot = await getDoc(docRef);
+  const list: string[] = snapshot.exists() ? (snapshot.data().list ?? []) : [];
+  setCache(cacheKey, list);
+  return list;
+}
+
 // Store Settings
 export async function getStoreSettings(): Promise<StoreSettings> {
   const cacheKey = 'store_settings';

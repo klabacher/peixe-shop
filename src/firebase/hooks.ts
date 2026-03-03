@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { onAuthChange, type User } from './auth';
 import { 
   getProducts, 
   getProductsByCategory, 
   getUserOrders,
-  createOrder 
+  createOrder,
+  getStoredCategories,
 } from './firestore';
 import type { Product } from '../types/product';
 
@@ -143,4 +144,34 @@ export function useCreateOrder() {
   };
 
   return { submitOrder, loading, error };
+}
+
+// Hook for categories: merges Firestore-stored list with product-derived list
+export function useCategories(products: Product[]) {
+  const [storedCategories, setStoredCategories] = useState<string[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [refreshIdx, setRefreshIdx] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingCategories(true);
+    getStoredCategories()
+      .then((list) => {
+        if (isMounted) {
+          setStoredCategories(list);
+          setLoadingCategories(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setLoadingCategories(false);
+      });
+    return () => { isMounted = false; };
+  }, [refreshIdx]);
+
+  const productCategories = Array.from(new Set(products.map((p) => p.category))).filter(Boolean);
+  const categories = Array.from(new Set([...storedCategories, ...productCategories])).sort();
+
+  const reloadCategories = useCallback(() => setRefreshIdx((n) => n + 1), []);
+
+  return { categories, loadingCategories, reloadCategories };
 }

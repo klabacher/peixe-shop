@@ -5,10 +5,14 @@ import {
   updateDoc, 
   deleteDoc,
   setDoc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from './config';
-import { clearFirestoreCache } from './firestore';
+import { clearFirestoreCache, getStoredCategories } from './firestore';
 import type { StoreSettings } from '../types/product';
 
 // Create Product (Admin only - validated by security rules)
@@ -79,3 +83,68 @@ export async function updateStoreSettings(settings: Partial<StoreSettings>): Pro
   
   clearFirestoreCache();
 }
+
+// ─── Category Management ──────────────────────────────────────────────────────
+
+async function saveCategoryList(list: string[]): Promise<void> {
+  const docRef = doc(db, 'settings', 'categories');
+  await setDoc(docRef, { list: [...new Set(list)].sort(), updatedAt: serverTimestamp() }, { merge: false });
+  clearFirestoreCache();
+}
+
+export async function addCategory(name: string): Promise<void> {
+  const existing = await getStoredCategories();
+  if (existing.map(c => c.toLowerCase()).includes(name.toLowerCase())) {
+    throw new Error('Categoria já existe');
+  }
+  await saveCategoryList([...existing, name]);
+}
+
+export async function renameCategory(oldName: string, newName: string): Promise<void> {
+  if (!newName.trim()) throw new Error('Nome inválido');
+  if (oldName === newName) return;
+
+  // Batch update all products with the old category name
+  const q = query(collection(db, 'products'), where('category', '==', oldName));
+  const snapshot = await getDocs(q);
+  if (snapshot.docs.length > 0) {
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(d => {
+      batch.update(doc(db, 'products', d.id), { category: newName, updatedAt: serverTimestamp() });
+    });
+    await batch.commit();
+  }
+
+  // Update stored categories list
+  const existing = await getStoredCategories();
+  const updated = existing.map(c => c === oldName ? newName : c);
+  // Also add newName if oldName wasn't in the list (product-derived category)
+  if (!updated.includes(newName)) updated.push(newName);
+  await saveCategoryList(updated.filter(c => c !== oldName || c === newName));
+}
+
+export async function deleteCategory(categoryName: string, reassignTo: string): Promise<void> {
+  if (!reassignTo.trim()) throw new Error('Selecione uma categoria de destino');
+  if (reassignTo === categoryName) throw new Error('A categoria de destino deve ser diferente');
+
+  // Batch update all products to the new category
+  const q = query(collection(db, 'products'), where('category', '==', categoryName));
+  const snapshot = await getDocs(q);
+  if (snapshot.docs.length > 0) {
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(d => {
+      batch.update(doc(db, 'products', d.id), { category: reassignTo, updatedAt: serverTimestamp() });
+    });
+    await batch.commit();
+  }
+
+  // Remove from stored categories list
+  const existing = await getStoredCategories();
+  await saveCategoryList(existing.filter(c => c !== categoryName));
+}
+
+export async function deleteCategoryEmpty(categoryName: string): Promise<void> {
+  const existing = await getStoredCategories();
+  await saveCategoryList(existing.filter(c => c !== categoryName));
+}
+

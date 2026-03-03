@@ -31,9 +31,10 @@ interface ProductFormProps {
   onClose: () => void;
   product?: any;
   onSaved?: () => void;
+  categories?: string[];
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   'Peixes',
   'Frutos do Mar',
   'Combos',
@@ -44,16 +45,19 @@ const CATEGORIES = [
 
 const UNITS = ['kg', 'un', 'kit', 'pacote', 'litro'];
 
-export default function ProductForm({ open, onClose, product, onSaved }: ProductFormProps) {
+export default function ProductForm({ open, onClose, product, onSaved, categories }: ProductFormProps) {
+  const CATEGORIES = categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadProgress, setUploadProgress] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const defaultCategory = CATEGORIES[0] ?? 'Peixes';
+
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Peixes',
+    category: defaultCategory,
     price: '',
     originalPrice: '',
     unit: 'kg',
@@ -80,7 +84,7 @@ export default function ProductForm({ open, onClose, product, onSaved }: Product
     } else {
       setFormData({
         name: '',
-        category: 'Peixes',
+        category: defaultCategory,
         price: '',
         originalPrice: '',
         unit: 'kg',
@@ -93,7 +97,7 @@ export default function ProductForm({ open, onClose, product, onSaved }: Product
     }
     setImageFile(null);
     setUploadProgress('');
-  }, [product, open]);
+  }, [product, open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

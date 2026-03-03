@@ -4,10 +4,7 @@ import Sheet from '@mui/joy/Sheet';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import EmailIcon from '@mui/icons-material/Email';
-import LanguageIcon from '@mui/icons-material/Language';
+
 import { useStoreSettings } from '../context/useStoreSettings';
 
 export default function StoreFooter() {
@@ -25,8 +22,6 @@ export default function StoreFooter() {
     .filter(Boolean)
     .join(', ');
 
-  const mapsQuery = settings.mapsEmbedQuery || fullAddress;
-
   return (
     <Sheet
       component="footer"
@@ -37,20 +32,7 @@ export default function StoreFooter() {
         zIndex: 10, // Ensure it stays on top if needed
       }}
     >
-      {/* Map Section */}
-      {mapsQuery && (
-        <Box sx={{ width: '100%', height: { xs: 200, sm: 250 }, overflow: 'hidden' }}>
-          <iframe
-            title="Localização da Loja"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            src={`https://maps.google.com/maps?q=${encodeURIComponent(mapsQuery)}&output=embed`}
-          />
-        </Box>
-      )}
+
 
       {/* Info Section */}
       <Box
@@ -145,76 +127,6 @@ export default function StoreFooter() {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography
-            level="body-xs"
-            component="a"
-            href="https://klabacher.dev/"
-            target="_blank"
-            rel="noopener"
-            sx={{
-              color: 'rgba(255,255,255,0.5)',
-              textDecoration: 'none',
-              transition: 'all 0.2s',
-              '&:hover': {
-                color: 'white',
-              },
-            }}
-          >
-            Feito por João Vitor Klabacher
-          </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
-            <Box
-              component="a"
-              href="https://www.linkedin.com/in/joaovitorklabacher/"
-              target="_blank"
-              rel="noopener"
-              sx={{
-                color: 'rgba(255,255,255,0.5)',
-                transition: 'all 0.2s',
-                '&:hover': { color: '#0A66C2' },
-              }}
-            >
-              <LinkedInIcon fontSize="small" />
-            </Box>
-            <Box
-              component="a"
-              href="https://github.com/klabacher"
-              target="_blank"
-              rel="noopener"
-              sx={{
-                color: 'rgba(255,255,255,0.5)',
-                transition: 'all 0.2s',
-                '&:hover': { color: 'white' },
-              }}
-            >
-              <GitHubIcon fontSize="small" />
-            </Box>
-            <Box
-              component="a"
-              href="mailto:jvklabacher@gmail.com"
-              sx={{
-                color: 'rgba(255,255,255,0.5)',
-                transition: 'all 0.2s',
-                '&:hover': { color: '#EA4335' },
-              }}
-            >
-              <EmailIcon fontSize="small" />
-            </Box>
-            <Box
-              component="a"
-              href="https://klabacher.dev/"
-              target="_blank"
-              rel="noopener"
-              sx={{
-                color: 'rgba(255,255,255,0.5)',
-                transition: 'all 0.2s',
-                '&:hover': { color: '#4285F4' },
-              }}
-            >
-              <LanguageIcon fontSize="small" />
-            </Box>
-          </Box>
         </Box>
       </Box>
     </Sheet>

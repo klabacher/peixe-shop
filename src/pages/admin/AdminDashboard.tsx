@@ -16,7 +16,7 @@ import {
 } from '@mui/joy';
 import AddIcon from '@mui/icons-material/Add';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { signOut, useProducts } from '../../firebase';
+import { signOut, useProducts, useCategories } from '../../firebase';
 import ProductForm from '../../components/admin/ProductForm';
 import ProductList from '../../components/admin/ProductList';
 import CategoryManager from '../../components/admin/CategoryManager';
@@ -26,6 +26,7 @@ import type { Product } from '../../types/product';
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { products, loading } = useProducts();
+  const { categories, reloadCategories } = useCategories(products);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -295,7 +296,11 @@ export default function AdminDashboard() {
             </TabPanel>
 
             <TabPanel value={1} sx={{ p: 0 }}>
-              <CategoryManager products={products} />
+              <CategoryManager
+                products={products}
+                categories={categories}
+                onCategoriesChanged={reloadCategories}
+              />
             </TabPanel>
 
             <TabPanel value={2} sx={{ p: 0 }}>
@@ -306,7 +311,12 @@ export default function AdminDashboard() {
       </Box>
 
       {showProductForm && (
-        <ProductForm open={showProductForm} onClose={handleFormClose} product={editingProduct} />
+        <ProductForm
+          open={showProductForm}
+          onClose={handleFormClose}
+          product={editingProduct}
+          categories={categories}
+        />
       )}
     </Box>
   );

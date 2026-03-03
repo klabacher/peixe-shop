@@ -9,7 +9,6 @@ import {
   Button,
   Grid,
   Divider,
-  Sheet,
   Alert,
   CircularProgress,
   Card,
@@ -290,36 +289,7 @@ export default function AdminSettings() {
               />
             </FormControl>
           </Grid>
-          <Grid xs={12}>
-            <FormControl>
-              <FormLabel>Busca do Google Maps (query)</FormLabel>
-              <Input
-                value={form.mapsEmbedQuery}
-                onChange={(e) => handleChange('mapsEmbedQuery', e.target.value)}
-                placeholder="Colatina, ES, Brasil"
-              />
-              <Typography level="body-xs" sx={{ mt: 0.5, color: 'text.tertiary' }}>
-                Usado para o embed do mapa no rodapé da loja
-              </Typography>
-            </FormControl>
-          </Grid>
 
-          {/* Maps Preview */}
-          {form.mapsEmbedQuery && (
-            <Grid xs={12}>
-              <Sheet variant="outlined" sx={{ borderRadius: 'lg', overflow: 'hidden', mt: 1 }}>
-                <iframe
-                  title="Localização da Loja"
-                  width="100%"
-                  height="200"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(form.mapsEmbedQuery)}&output=embed`}
-                />
-              </Sheet>
-            </Grid>
-          )}
         </Grid>
       </Card>
 
