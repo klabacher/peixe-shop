@@ -1,6 +1,7 @@
 {
   "projects": {
-    "staging": "vigano-pescados"
+    "staging": "vigano-pescados",
+    "testing": "cjsnow-dev"
   },
   "targets": {},
   "etags": {}

@@ -16,6 +16,7 @@ import ProductCard from '../components/ProductCard';
 import ProductModal from '../components/ProductModal';
 import LogoSection from '../components/LogoSection';
 import { useCart } from '../context/CartContext';
+import { useStoreSettings } from '../context/useStoreSettings';
 import { useProducts } from '../firebase/hooks';
 import type { Product } from '../types/product';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
@@ -34,13 +35,19 @@ type CategoryTab = {
 
 export default function HomePage() {
   const { addToCart, count } = useCart();
+  const { settings } = useStoreSettings();
   const { products, loading, error } = useProducts();
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = React.useState<string>('Mais Pedidos');
 
+  const visibleProducts = React.useMemo(
+    () => products.filter((product) => product.isVisible !== false),
+    [products]
+  );
+
   const dynamicCategoryTabs = React.useMemo<CategoryTab[]>(() => {
     const seen = new Set<string>();
-    return products
+    return visibleProducts
       .map((product) => product.category)
       .filter((category): category is string => {
         if (!category || seen.has(category)) {
@@ -54,7 +61,7 @@ export default function HomePage() {
         label: category,
         icon: null,
       }));
-  }, [products]);
+  }, [visibleProducts]);
 
   const categoryTabs = React.useMemo(
     () => [...BASE_TABS, ...dynamicCategoryTabs],
@@ -68,29 +75,29 @@ export default function HomePage() {
   }, [categoryTabs, selectedCategory]);
 
   const filteredProducts = React.useMemo<Product[]>(() => {
-    if (!products.length) return [];
+    if (!visibleProducts.length) return [];
     if (selectedCategory === 'Mais Pedidos') {
-      const bestSellers = products.filter((product) => product.isBestSeller);
+      const bestSellers = visibleProducts.filter((product) => product.isBestSeller);
       return bestSellers.length
         ? bestSellers
-        : products.slice(0, Math.min(4, products.length));
+        : visibleProducts.slice(0, Math.min(4, visibleProducts.length));
     }
 
     if (selectedCategory === 'Promoções') {
-      return products.filter(
+      return visibleProducts.filter(
         (product) => product.originalPrice && product.originalPrice > product.price
       );
     }
 
-    return products.filter((product) => product.category === selectedCategory);
-  }, [products, selectedCategory]);
+    return visibleProducts.filter((product) => product.category === selectedCategory);
+  }, [visibleProducts, selectedCategory]);
 
   const heroProduct = React.useMemo<Product | null>(() => {
-    if (!products.length) return null;
+    if (!visibleProducts.length) return null;
     return (
-      products.find((product) => product.isBestSeller) ?? products[0]
+      visibleProducts.find((product) => product.isBestSeller) ?? visibleProducts[0]
     );
-  }, [products]);
+  }, [visibleProducts]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -241,7 +248,7 @@ export default function HomePage() {
                 textColor='success.plainColor'
                 sx={{ mb: 1 }}
               >
-                Primeiro item no banco
+                  {settings.maintenanceMode ? 'Modo manutenção ativo' : 'Primeiro item visível'}
               </Typography>
               <Typography
                 level='h3'

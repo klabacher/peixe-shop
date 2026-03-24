@@ -29,3 +29,5 @@ firestore-debug.log
 *.njsproj
 *.sln
 *.sw?
+
+.env.backup

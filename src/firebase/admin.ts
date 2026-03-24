@@ -15,8 +15,7 @@ import { db } from './config';
 import { clearFirestoreCache, getStoredCategories } from './firestore';
 import type { StoreSettings } from '../types/product';
 
-// Create Product (Admin only - validated by security rules)
-export async function createProduct(productData: {
+type ProductPayload = {
   name: string;
   category: string;
   price: number;
@@ -26,9 +25,14 @@ export async function createProduct(productData: {
   stock: number;
   image?: string;
   isBestSeller?: boolean;
-}) {
+  isVisible?: boolean;
+};
+
+// Create Product (Admin only - validated by security rules)
+export async function createProduct(productData: ProductPayload) {
   const docRef = await addDoc(collection(db, 'products'), {
     ...productData,
+    isVisible: productData.isVisible ?? true,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -38,7 +42,7 @@ export async function createProduct(productData: {
 }
 
 // Update Product (Admin only - validated by security rules)
-export async function updateProduct(productId: string, productData: any) {
+export async function updateProduct(productId: string, productData: Partial<ProductPayload>) {
   const docRef = doc(db, 'products', productId);
   await updateDoc(docRef, {
     ...productData,

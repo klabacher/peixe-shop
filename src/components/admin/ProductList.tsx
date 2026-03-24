@@ -12,8 +12,11 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import WarningIcon from '@mui/icons-material/Warning';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { deleteProduct } from '../../firebase/admin';
 import type { Product } from '../../types/product';
+import { useStoreSettings } from '../../context/useStoreSettings';
 
 interface ProductListProps {
   products: Product[];
@@ -23,6 +26,7 @@ interface ProductListProps {
 
 export default function ProductList({ products, loading, onEdit }: ProductListProps) {
   const [deleting, setDeleting] = useState<string | null>(null);
+  const { settings } = useStoreSettings();
 
   const handleDelete = async (productId: string, productName: string) => {
     if (!confirm(`Excluir "${productName}"? Esta ação não pode ser desfeita.`)) {
@@ -69,6 +73,8 @@ export default function ProductList({ products, loading, onEdit }: ProductListPr
         const stockDecorator = stockValue !== null && stockValue < 10 ? <WarningIcon /> : null;
         const stockLabel = stockValue === null ? 'Estoque: —' : `Estoque: ${stockValue}`;
         const unitLabel = product.unit ?? 'un';
+        const isVisible = product.isVisible !== false;
+        const isVisibleToCustomer = isVisible && !settings.maintenanceMode;
 
         return (
           <Card key={product.id} variant="outlined">
@@ -146,6 +152,18 @@ export default function ProductList({ products, loading, onEdit }: ProductListPr
                   {product.isBestSeller && (
                     <Chip size="sm" color="primary">
                       ⭐ Mais Pedido
+                    </Chip>
+                  )}
+                  <Chip
+                    size="sm"
+                    color={isVisibleToCustomer ? 'success' : 'neutral'}
+                    startDecorator={isVisibleToCustomer ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  >
+                    {isVisibleToCustomer ? 'Visível na loja' : 'Oculto na loja'}
+                  </Chip>
+                  {settings.maintenanceMode && (
+                    <Chip size="sm" color="warning" variant="soft">
+                      Oculto por manutenção
                     </Chip>
                   )}
                 </Box>

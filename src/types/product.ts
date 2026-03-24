@@ -7,6 +7,7 @@ export interface Product {
   image: string;
   category: string;
   isBestSeller?: boolean;
+  isVisible?: boolean;
   unit?: string;
   stock?: number;
 }
@@ -16,6 +17,7 @@ export interface StoreSettings {
   storeSubname: string;
   storeDescription: string;
   storeTagline: string;
+  maintenanceMode: boolean;
   address: string;
   addressCep: string;
   addressCity: string;
@@ -31,6 +33,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   storeSubname: 'PESCADOS',
   storeDescription: 'Há anos selecionando os peixes mais nobres e os camarões mais frescos para você. Nossa missão é levar saúde, sabor e a tradição da alta gastronomia diretamente para a sua família em Colatina.',
   storeTagline: 'O Frescor do Mar, na Sua Mesa.',
+  maintenanceMode: false,
   address: 'Rua dos Peixes, 123 - Centro',
   addressCep: '29700-000',
   addressCity: 'Colatina',

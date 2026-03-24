@@ -25,14 +25,28 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { createProduct, updateProduct } from '../../firebase/admin';
 import { uploadImage, DEFAULT_PRODUCT_IMAGE } from '../../supabase';
 import { clearFirestoreCache } from '../../firebase/firestore';
+import type { Product } from '../../types/product';
 
 interface ProductFormProps {
   open: boolean;
   onClose: () => void;
-  product?: any;
+  product?: Product | null;
   onSaved?: () => void;
   categories?: string[];
 }
+
+type ProductFormData = {
+  name: string;
+  category: string;
+  price: string;
+  originalPrice: string;
+  unit: string;
+  description: string;
+  stock: string;
+  image: string;
+  isBestSeller: boolean;
+  isVisible: boolean;
+};
 
 const DEFAULT_CATEGORIES = [
   'Peixes',
@@ -55,7 +69,7 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
 
   const defaultCategory = CATEGORIES[0] ?? 'Peixes';
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     category: defaultCategory,
     price: '',
@@ -65,9 +79,12 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
     stock: '',
     image: '',
     isBestSeller: false,
+    isVisible: true,
   });
 
   useEffect(() => {
+    if (!open) return;
+
     if (product) {
       setFormData({
         name: product.name || '',
@@ -79,6 +96,7 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
         stock: product.stock?.toString() || '',
         image: product.image || '',
         isBestSeller: product.isBestSeller || false,
+        isVisible: product.isVisible !== false,
       });
       setImagePreview(product.image || '');
     } else {
@@ -92,14 +110,15 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
         stock: '',
         image: '',
         isBestSeller: false,
+        isVisible: true,
       });
       setImagePreview('');
     }
     setImageFile(null);
     setUploadProgress('');
-  }, [product, open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [defaultCategory, open, product]);
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = <K extends keyof ProductFormData>(field: K, value: ProductFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -152,6 +171,7 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
         stock: parseInt(formData.stock),
         image: imageUrl,
         isBestSeller: formData.isBestSeller,
+        isVisible: formData.isVisible,
       };
 
       if (product?.id) {
@@ -167,8 +187,9 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
       } else {
         window.location.reload();
       }
-    } catch (error: any) {
-      alert(`Erro: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro ao salvar produto';
+      alert(`Erro: ${message}`);
     } finally {
       setLoading(false);
       setUploadProgress('');
@@ -288,7 +309,7 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
                 <FormLabel>Categoria</FormLabel>
                 <Select
                   value={formData.category}
-                  onChange={(_, value) => handleChange('category', value)}
+                  onChange={(_, value) => handleChange('category', value ?? defaultCategory)}
                 >
                   {CATEGORIES.map((cat) => (
                     <Option key={cat} value={cat}>
@@ -304,7 +325,7 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
                 <FormLabel>Unidade</FormLabel>
                 <Select
                   value={formData.unit}
-                  onChange={(_, value) => handleChange('unit', value)}
+                  onChange={(_, value) => handleChange('unit', value ?? 'kg')}
                 >
                   {UNITS.map((unit) => (
                     <Option key={unit} value={unit}>
@@ -376,6 +397,21 @@ export default function ProductForm({ open, onClose, product, onSaved, categorie
                 <Switch
                   checked={formData.isBestSeller}
                   onChange={(e) => handleChange('isBestSeller', e.target.checked)}
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid xs={12}>
+              <FormControl orientation="horizontal" sx={{ justifyContent: 'space-between' }}>
+                <Box>
+                  <FormLabel>Produto visível na loja</FormLabel>
+                  <Typography level="body-sm">
+                    Quando desligado, o produto fica oculto para clientes.
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={formData.isVisible}
+                  onChange={(e) => handleChange('isVisible', e.target.checked)}
                 />
               </FormControl>
             </Grid>

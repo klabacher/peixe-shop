@@ -12,6 +12,7 @@ import {
   Alert,
   CircularProgress,
   Card,
+  Switch,
 } from '@mui/joy';
 import SaveIcon from '@mui/icons-material/Save';
 import StorefrontIcon from '@mui/icons-material/Storefront';
@@ -19,6 +20,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LockIcon from '@mui/icons-material/Lock';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import { useStoreSettings } from '../../context/useStoreSettings';
 import { updateStoreSettings } from '../../firebase/admin';
 import { changeAdminPassword } from '../../firebase/auth';
@@ -57,7 +59,7 @@ export default function AdminSettings() {
     }
   }, [settings, settingsLoading]);
 
-  const handleChange = (field: keyof StoreSettings, value: string) => {
+  const handleChange = (field: keyof StoreSettings, value: StoreSettings[keyof StoreSettings]) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setSaved(false);
   };
@@ -103,8 +105,9 @@ export default function AdminSettings() {
       await updateStoreSettings(form);
       setSaved(true);
       refresh();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao salvar configurações');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao salvar configurações';
+      setError(message);
     } finally {
       setSaving(false);
     }
@@ -130,11 +133,12 @@ export default function AdminSettings() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const authError = err as { code?: string; message?: string };
       setPasswordError(
-        err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
+        authError.code === 'auth/wrong-password' || authError.code === 'auth/invalid-credential'
           ? 'Senha atual incorreta'
-          : err.message || 'Erro ao alterar senha'
+          : authError.message || 'Erro ao alterar senha'
       );
     } finally {
       setPasswordSaving(false);
@@ -291,6 +295,33 @@ export default function AdminSettings() {
           </Grid>
 
         </Grid>
+      </Card>
+
+      <Card variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 'xl' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+          <BuildCircleIcon sx={{ color: 'warning.500' }} />
+          <Typography level="h4">Modo de Operação</Typography>
+        </Box>
+
+        <FormControl orientation="horizontal" sx={{ justifyContent: 'space-between', gap: 2 }}>
+          <Box>
+            <FormLabel>Modo manutenção</FormLabel>
+            <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+              Oculta todos os produtos da vitrine e exibe uma tela de manutenção para clientes.
+            </Typography>
+          </Box>
+          <Switch
+            color="warning"
+            checked={form.maintenanceMode}
+            onChange={(e) => handleChange('maintenanceMode', e.target.checked)}
+          />
+        </FormControl>
+
+        {form.maintenanceMode && (
+          <Alert color="warning" variant="soft" sx={{ mt: 2 }}>
+            Enquanto ativo, apenas o painel administrativo continuará acessível normalmente.
+          </Alert>
+        )}
       </Card>
 
       {/* Save Button */}
